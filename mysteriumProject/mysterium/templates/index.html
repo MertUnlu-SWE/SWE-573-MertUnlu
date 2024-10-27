@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="hero">
+    <h2>Find the Truth</h2>
+    <input type="text" placeholder="Search..." class="search-bar">
+    <button class="category-btn">Categories</button>
+</section>
+
+<div class="glider-contain">
+    <div class="glider">
+        
+    </div>
+
+    <!-- Navigation Arrows -->
+    <button class="glider-prev">«</button>
+    <button class="glider-next">»</button>
+    <div role="tablist" class="dots"></div>
+</div>
+
+{% endblock %}
