@@ -2,12 +2,12 @@ body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    background: url('/static/images/MysteriumBackground.jpeg') no-repeat center center fixed;
+    background: url('/static/images/MysteriumBackground.jpg') no-repeat center center fixed;
     background-size: cover;
 }
 
 .share-container {
-    background: rgba(255, 255, 255, 0.9);
+    background-color: rgba(30, 30, 30, 0.85) !important; /* Daha koyu ve opak bir renk */
     padding: 40px;
     border-radius: 12px;
     width: 450px;
@@ -22,12 +22,12 @@ body {
     align-items: center;
     margin-bottom: 10px;
     border: 2px dashed #ccc;
-    border-radius: 12px; /* Daha yuvarlak kenarlar */
+    border-radius: 12px;
     transition: border-color 0.3s;
 }
 
 .image-upload:hover {
-    border-color: #6c63ff; /* Hover'da renk değişimi */
+    border-color: #6c63ff;
 }
 
 .image-upload img {
@@ -37,7 +37,7 @@ body {
 
 input[type="text"],
 textarea {
-    border-radius: 12px; /* Daha yuvarlak kenarlar */
+    border-radius: 12px;
     border: 1px solid #ccc;
     padding: 10px;
     transition: border-color 0.3s;
@@ -45,13 +45,13 @@ textarea {
 
 input[type="text"]:focus,
 textarea:focus {
-    border-color: #6c63ff; /* Odaklandığında renk değişimi */
+    border-color: #6c63ff;
     outline: none;
 }
 
 .tags-input {
     display: flex;
-    gap: 8px; /* Aralarına daha fazla boşluk */
+    gap: 8px;
     flex-wrap: wrap;
 }
 
@@ -63,7 +63,7 @@ textarea:focus {
     margin: 2px;
     background-color: #6c63ff;
     color: white;
-    border-radius: 12px; /* Daha yuvarlak etiketler */
+    border-radius: 12px;
 }
 
 .btn-close {
@@ -87,7 +87,7 @@ textarea:focus {
     background-color: #6c63ff;
     border-color: #6c63ff;
     padding: 12px 20px;
-    border-radius: 12px; /* Daha yuvarlak kenarlar */
+    border-radius: 12px;
 }
 
 .btn-primary:hover {

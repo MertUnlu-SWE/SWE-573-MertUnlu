@@ -3,7 +3,7 @@ body {
     padding: 0;
     font-family: Arial, sans-serif;
     background: linear-gradient(to bottom right, #e0e0e0, #ffffff);
-    background-image: url('/static/images/MysteriumBackground.jpeg');
+    background-image: url('/static/images/MysteriumBackground.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;

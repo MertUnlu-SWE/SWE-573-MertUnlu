@@ -1,40 +1,24 @@
 body {
-    background-image: url('/static/images/MysteriumBackground.jpeg');
+    background-image: url('/static/images/MysteriumBackground.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-position: center;
 }
 
-.hero-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 40px 0;
-    color: white;
-}
-
-.hero-text h2 {
-    font-size: 3em;
-    margin: 0;
-}
-
-.hero-text p {
-    margin: 10px 0 20px;
-    font-size: 1.2em;
+h2{
+    color: antiquewhite;
 }
 
 .cards-section {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 30px;
 }
 
-.row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+.card {
+    margin: 0 30px;
 }
 
 .card img {
@@ -50,41 +34,28 @@ body {
     object-fit: cover;
 }
 
+.btn-primary{
+    background-color: darkblue;
+}
+
+.btn-primary:hover{
+    background-color: purple;
+}
 
 .glider-contain {
-    max-width: 50%;
+    max-width: 80%;
     margin: 0 auto;
     padding-top: 120px;
 }
 
 .glider .card {
-    margin: 0 15px;
-    width: 300px;
+    width: 250px;
 }
 
-.glider-prev,
-.glider-next {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10;
-    background-color: rgba(255, 255, 255, 0.8);
-    width: 35px;
-    height: 35px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    cursor: pointer;
+.glider-next, .glider-prev{
+    color: antiquewhite;
 }
 
-.glider-prev {
-    left: 0;
-    margin-left: 10px;
+.glider-next:hover, .glider-prev:hover{
+    color: blue;
 }
-
-.glider-next {
-    right: 0;
-    margin-right: 10px;
-}
-

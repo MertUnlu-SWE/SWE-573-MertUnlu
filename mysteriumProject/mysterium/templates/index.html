@@ -1,31 +1,33 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block content %}
-<section class="hero">
-    <h2>Find the Truth</h2>
-    <input type="text" placeholder="Search..." class="search-bar">
-    <button class="category-btn">Categories</button>
-</section>
-
-<div class="glider-contain">
-    <div class="glider">
-        {% for post in posts %}
-        <div class="card" style="width: 18rem;">
-            <img src="{{ post.image.url }}" class="card-img-top" alt="Mystery Image">
-            <div class="card-body">
-                <h5 class="card-title">{{ post.title }}</h5>
-                <p class="card-text">{{ post.description|truncatewords:10 }}</p>
-                <a href="#" class="btn btn-primary">Read More</a>
+<div class="index-page">
+    {% block content %}
+    <section class="hero">
+        <h2>Find the Truth</h2>
+        <input type="text" placeholder="Search..." class="search-bar">
+        <button class="category-btn">Categories</button>
+    </section>
+    
+    <div class="glider-contain">
+        <div class="glider">
+            {% for post in posts %}
+            <div class="card" style="width: 18rem;">
+                <img src="{{ post.object_image.url }}" class="card-img-top" alt="Mystery Image">
+                <div class="card-body">
+                    <h5 class="card-title">{{ post.title }}</h5>
+                    <p class="card-text">{{ post.description|truncatewords:10 }}</p>
+                    <a href="#" class="btn btn-primary">Read More</a>
+                </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
+    
+        <!-- Navigation Arrows -->
+        <button class="glider-prev">«</button>
+        <button class="glider-next">»</button>
+        <div role="tablist" class="dots"></div>
     </div>
-
-    <!-- Navigation Arrows -->
-    <button class="glider-prev">«</button>
-    <button class="glider-next">»</button>
-    <div role="tablist" class="dots"></div>
+    
+    {% endblock %}
 </div>
-
-{% endblock %}
