@@ -1,0 +1,36 @@
+# Virtual environment klasörü
+mysterium_env/
+
+# Medya dosyaları (kullanıcıların yüklediği resimler vb.)
+media/
+
+# Django cache dosyaları
+__pycache__/
+*.py[cod]
+
+# Veritabanı dosyaları (eğer sqlite kullanıyorsan)
+*.db
+*.sqlite3
+
+# Geçici dosyalar
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+
+# Çeşitli IDE'ler için klasörler
+.idea/
+.vscode/
+
+# Çalışma ortamı dosyaları
+*.env
+.env
+.DS_Store
+
+# Node.js veya diğer paket yöneticisi klasörleri (varsa)
+node_modules/
+
+# Gereksiz OS dosyaları
+Thumbs.db
+ehthumbs.db

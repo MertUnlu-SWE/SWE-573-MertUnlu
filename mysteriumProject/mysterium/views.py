@@ -3,16 +3,16 @@ from django.http import HttpResponse, HttpResponseNotFound
 
 # Create your views here.
 pages = {
-    "login": "Log in Page",
-    "index": "Main Page",
-    "postDetail": "Post Detail Page",
-    "postCreation": "Post Creation Page"
+    "login": "login.html",
+    "index": "index.html",
+    "postDetail": "postDetail.html",
+    "postCreation": "postCreation.html"
 }
 
 
 def selectedPage(request, page):
     try:
         currentPage = pages[page]
-        return render(request, 'login.html')
+        return render(request, currentPage)
     except:
         return HttpResponseNotFound('Page not found!')
