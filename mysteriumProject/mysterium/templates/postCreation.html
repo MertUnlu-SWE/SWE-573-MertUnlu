@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="share-container p-4 rounded-3 shadow-lg">
+        <h2 class="text-center mb-4">Share Your Mystery</h2>
+        
+        <!-- Title Input -->
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" placeholder="Enter title">
+        </div>
+
+        <!-- Image Upload -->
+        <div class="mb-3 text-center">
+            <div class="image-upload border rounded mb-3">
+                <img src="{% static 'images/imagePlaceholder.jpg' %}" alt="Upload Placeholder" class="img-fluid">
+            </div>
+            <button class="btn btn-outline-secondary">Upload Image</button>
+        </div>
+
+        <!-- Tags Input -->
+        <div class="mb-3">
+            <label for="tags" class="form-label">Tags</label>
+            <div class="tags-input d-flex flex-wrap gap-2">
+                <span class="badge bg-secondary">Tag 1 <button type="button" class="btn-close btn-close-white btn-sm ms-2"></button></span>
+                <span class="badge bg-secondary">Tag 2 <button type="button" class="btn-close btn-close-white btn-sm ms-2"></button></span>
+                <span class="badge bg-secondary">Tag 3 <button type="button" class="btn-close btn-close-white btn-sm ms-2"></button></span>
+            </div>
+            <input type="text" class="form-control mt-2" id="tags" placeholder="Add a tag">
+        </div>
+
+        <!-- Description -->
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" rows="4" placeholder="Enter a description..."></textarea>
+        </div>
+
+        <!-- Share Button -->
+        <div class="text-center">
+            <button class="btn btn-primary w-100">Share</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

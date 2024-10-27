@@ -1,0 +1,50 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: url('/static/images/MysteriumBackground.jpeg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+.post-image {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.post-description {
+    font-size: 1.1em;
+}
+
+.comment {
+    margin-bottom: 10px;
+}
+
+textarea {
+    border-radius: 8px;
+}
+
+.btn-outline-primary,
+.btn-outline-danger {
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-outline-primary:hover {
+    background-color: #6c63ff;
+    color: white;
+}
+
+.btn-outline-danger:hover {
+    background-color: #ff6b6b;
+    color: white;
+}
+
+.btn-primary {
+    background-color: #6c63ff;
+    border-color: #6c63ff;
+    border-radius: 8px;
+}
+
+.btn-primary:hover {
+    background-color: #5a55d1;
+    border-color: #5a55d1;
+}
