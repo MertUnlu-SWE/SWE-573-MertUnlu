@@ -1,0 +1,90 @@
+body {
+    background-image: url('/static/images/MysteriumBackground.jpeg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+}
+
+.hero-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 40px 0;
+    color: white;
+}
+
+.hero-text h2 {
+    font-size: 3em;
+    margin: 0;
+}
+
+.hero-text p {
+    margin: 10px 0 20px;
+    font-size: 1.2em;
+}
+
+.cards-section {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.card img {
+    width: 100%;
+    height: 200px;
+    max-height: 200px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+
+.glider-contain {
+    max-width: 50%;
+    margin: 0 auto;
+    padding-top: 120px;
+}
+
+.glider .card {
+    margin: 0 15px;
+    width: 300px;
+}
+
+.glider-prev,
+.glider-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 0.8);
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.glider-prev {
+    left: 0;
+    margin-left: 10px;
+}
+
+.glider-next {
+    right: 0;
+    margin-right: 10px;
+}
+
