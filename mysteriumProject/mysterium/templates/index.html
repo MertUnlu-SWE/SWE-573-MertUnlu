@@ -7,6 +7,9 @@
         <h2>Find the Truth</h2>
         <input type="text" placeholder="Search..." class="search-bar">
         <button class="category-btn">Categories</button>
+        <div class="share-mystery">
+            <a href="{% url 'postCreation' %}" class="btn btn-primary">Share Your Mystery</a>
+        </div>        
     </section>
     
     <div class="glider-contain">
@@ -17,7 +20,7 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ post.title }}</h5>
                     <p class="card-text">{{ post.description|truncatewords:10 }}</p>
-                    <a href="#" class="btn btn-primary">Read More</a>
+                    <a href="{% url 'postDetail' post.id %}" class="btn btn-primary">Read More</a>
                 </div>
             </div>
             {% endfor %}

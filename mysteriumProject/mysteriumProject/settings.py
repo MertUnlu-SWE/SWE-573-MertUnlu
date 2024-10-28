@@ -93,7 +93,14 @@ DATABASES = {
 }
 
 
+#AUTH_USER_MODEL = 'users.CustomUser'
+AUTHENTICATION_BACKENDS = [
+    'mysterium.backends.EmailBackend',  # Adjust this to match your app name
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 # Password validation
+
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
