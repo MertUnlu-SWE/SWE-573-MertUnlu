@@ -1,86 +1,55 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
     background: url('/static/images/MysteriumBackground.jpg') no-repeat center center fixed;
     background-size: cover;
 }
 
+h2 {
+    color: #333;
+}
+
 .share-container {
-    background-color: rgba(30, 30, 30, 0.85) !important; /* Daha koyu ve opak bir renk */
+    background-color: rgba(255, 255, 255, 0.95);
     padding: 40px;
     border-radius: 12px;
-    width: 450px;
+    width: 500px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
 .image-upload {
-    height: 200px;
-    width: 100%;
-    background-color: #f3f3f3;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 10px;
     border: 2px dashed #ccc;
-    border-radius: 12px;
-    transition: border-color 0.3s;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
 }
 
-.image-upload:hover {
-    border-color: #6c63ff;
-}
-
-.image-upload img {
-    max-width: 80%;
-    height: auto;
-}
-
-input[type="text"],
-textarea {
-    border-radius: 12px;
-    border: 1px solid #ccc;
+input[type="text"], textarea, input[type="file"] {
+    width: 100%;
     padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
     transition: border-color 0.3s;
 }
 
-input[type="text"]:focus,
-textarea:focus {
+input[type="text"]:focus, textarea:focus, input[type="file"]:focus {
     border-color: #6c63ff;
     outline: none;
 }
 
 .tags-input {
     display: flex;
-    gap: 8px;
     flex-wrap: wrap;
-}
-
-.badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 8px 12px;
-    font-size: 0.9em;
-    margin: 2px;
-    background-color: #6c63ff;
-    color: white;
-    border-radius: 12px;
-}
-
-.btn-close {
-    font-size: 0.7em;
-    margin-left: 5px;
-}
-
-.btn-outline-secondary {
-    margin-bottom: 10px;
-    padding: 10px 20px;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid #ccc;
     border-radius: 8px;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.btn-outline-secondary:hover {
-    background-color: #6c63ff;
-    color: white;
 }
 
 .btn-primary {
@@ -88,6 +57,9 @@ textarea:focus {
     border-color: #6c63ff;
     padding: 12px 20px;
     border-radius: 12px;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s;
 }
 
 .btn-primary:hover {

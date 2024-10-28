@@ -12,6 +12,7 @@ class Post(models.Model):
     object_image = models.ImageField(
         upload_to='object_images/', blank=True, null=True)  # Object Image
     description = models.TextField()  # Description
+    tags = models.CharField(max_length=500, blank=True, help_text="Comma-separated tags.")
     created_at = models.DateTimeField(auto_now_add=True)  # Created Date
 
     def __str__(self):

@@ -2,7 +2,9 @@ from django.contrib.auth import login, authenticate
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse, HttpResponseNotFound
 from .models import Post, Comment
-from .forms import CommentForm
+from .forms import CommentForm, PostForm
+from django.db.models import Q
+from .wikidata_utils import fetch_wikidata_info
 
 # Create your views here.
 pages = {
@@ -32,7 +34,7 @@ def login_view(request):
         if user is not None:
             print(f"Authenticated: {user}")
             login(request, user)
-            return redirect('index')  # Giriş başarılı, ana sayfaya yönlendir
+            return redirect('index')
         else:
             print("Invalid credentials")
             return render(request, 'login.html', {'error': 'Invalid credentials'})
@@ -40,17 +42,16 @@ def login_view(request):
 
 
 def index(request):
-    posts = Post.objects.all()  # Retrieve all posts to display on the index page
+    posts = Post.objects.all()
     return render(request, 'index.html', {'posts': posts})
-
-def post_creation(request):
-    return render(request, 'postCreation.html')
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    # İlgili post için yorumları getir
     comments = Comment.objects.filter(post=post)
 
+    # Split tags into a list
+    tags = post.tags.split(',') if post.tags else []
+    
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
@@ -62,4 +63,38 @@ def post_detail(request, post_id):
     else:
         form = CommentForm()
 
-    return render(request, 'postDetail.html', {'post': post, 'form': form, 'comments': comments})
+    return render(request, 'postDetail.html', {'post': post, 'comments': comments, 'tags': tags})
+
+def post_creation(request):
+    if request.method == 'POST':
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.user = request.user
+
+            # Handle tags and Wikidata integration
+            tags = form.cleaned_data['tags']
+            post.tags = ', '.join([tag.strip() for tag in tags.split(',')])
+
+            # Fetch Wikidata information for each tag
+            tag_info = []
+            for tag in tags.split(','):
+                wikidata_id, wikidata_label = fetch_wikidata_info(tag.strip())
+                if wikidata_id:
+                    tag_info.append({'tag': tag, 'wikidata_id': wikidata_id, 'wikidata_label': wikidata_label})
+
+            post.save()
+            return render(request, 'postDetail.html', {'post': post, 'tag_info': tag_info})
+    else:
+        form = PostForm()
+
+    return render(request, 'postCreation.html', {'form': form})
+
+def search_posts(request):
+    query = request.GET.get('query')
+    if query:
+        tags = query.split(',')
+        posts = Post.objects.filter(Q(tags__icontains=tags))
+    else:
+        posts = Post.objects.all()
+    return render(request, 'index.html', {'posts': posts})
