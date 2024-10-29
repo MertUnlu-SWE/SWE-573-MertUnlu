@@ -5,30 +5,58 @@ document.addEventListener('DOMContentLoaded', function () {
     tagInput.parentNode.insertBefore(tagsContainer, tagInput);
     
     let tags = [];
-    
+
+
     tagInput.addEventListener('keypress', function (e) {
-        if (e.key === ',') {
+        if (e.key === ',' || e.key === 'Enter') {
             e.preventDefault();
-            addTag(tagInput.value.trim());
+            const newTag = tagInput.value.trim();
+            if (newTag) {
+                fetchWikidataTag(newTag);
+            }
             tagInput.value = '';
         }
     });
 
-    function addTag(tag) {
+
+    function addTag(tag, qNumber = null) {
         if (tag && !tags.includes(tag)) {
-            tags.push(tag);
+            let formattedTag = tag;
+            if (qNumber) {
+                if (!qNumber.startsWith('Q')) {
+                    formattedTag += ` (Q${qNumber})`;
+                } else {
+                    formattedTag += ` (${qNumber})`;
+                }
+            }
+    
+            tags.push(formattedTag);
             const tagElement = document.createElement('span');
             tagElement.classList.add('tag');
-            tagElement.innerHTML = `${tag} <button type="button">&times;</button>`;
-            
+            tagElement.innerHTML = `${formattedTag} <button type="button">&times;</button>`;
+    
             tagElement.querySelector('button').addEventListener('click', function () {
-                tags = tags.filter(t => t !== tag);
+                tags = tags.filter(t => t !== formattedTag);
                 tagElement.remove();
                 tagInput.value = tags.join(', ');
             });
-            
+    
             tagsContainer.appendChild(tagElement);
             tagInput.value = tags.join(', ');
         }
+    }        
+
+
+    function fetchWikidataTag(tag) {
+        fetch(`/fetch_wikidata/?tag=${encodeURIComponent(tag)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.qNumber) {
+                    addTag(tag, data.qNumber);
+                } else {
+                    addTag(tag);
+                }
+            })
+            .catch(error => console.error('Error fetching Wikidata tag:', error));
     }
 });

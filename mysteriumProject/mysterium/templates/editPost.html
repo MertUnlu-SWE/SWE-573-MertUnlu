@@ -5,9 +5,9 @@
 <link rel="stylesheet" href="{% static 'css/postCreationStyle.css' %}">
 <div class="container mt-5 d-flex justify-content-center">
     <div class="share-container p-5 rounded-3 shadow-lg">
-        <h2 class="text-center mb-4">Share Your Mystery</h2>
+        <h2 class="text-center mb-4">Edit Your Mystery</h2>
 
-        <form method="post" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
             <!-- Title Field -->
@@ -37,10 +37,11 @@
 
             <!-- Submit Button -->
             <div class="text-center">
-                <button type="submit" class="btn btn-primary w-100 mt-4">Share</button>
+                <button type="submit" class="btn btn-primary w-100 mt-4">Save Changes</button>
             </div>
         </form>
     </div>
 </div>
+
 <script src="{% static 'js/tags.js' %}"></script>
 {% endblock %}

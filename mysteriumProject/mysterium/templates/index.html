@@ -1,17 +1,27 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block content %}
 <div class="index-page">
-    {% block content %}
     <section class="hero">
-        <h2>Find the Truth</h2>
-        <input type="text" placeholder="Search..." class="search-bar">
-        <button class="category-btn">Categories</button>
+        <h2>Find the Mystery</h2>
+        <form id="search-form">
+            <input type="text" id="search-input" placeholder="Search..." class="search-bar">
+            <button type="submit" class="search-btn">Search</button>
+        </form>
+
         <div class="share-mystery">
             <a href="{% url 'postCreation' %}" class="btn btn-primary">Share Your Mystery</a>
-        </div>        
+        </div>
     </section>
-    
+
+    <!-- Search Results Container -->
+    <div id="search-results-container" class="search-results-container hidden">
+        <button id="close-search-results" class="close-btn">&times;</button>
+        <ul id="search-results" class="search-results"></ul>
+    </div>
+
+
     <div class="glider-contain">
         <div class="glider">
             {% for post in posts %}
@@ -20,17 +30,19 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ post.title }}</h5>
                     <p class="card-text">{{ post.description|truncatewords:10 }}</p>
-                    <a href="{% url 'postDetail' post.id %}" class="btn btn-primary">Read More</a>
+                    <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">Read More</a>
                 </div>
             </div>
             {% endfor %}
         </div>
-    
+
         <!-- Navigation Arrows -->
         <button class="glider-prev">«</button>
         <button class="glider-next">»</button>
         <div role="tablist" class="dots"></div>
     </div>
-    
-    {% endblock %}
+
 </div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="{% static 'js/wikidataFetch.js' %}"></script>
+{% endblock %}
