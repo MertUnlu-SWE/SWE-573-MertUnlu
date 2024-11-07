@@ -5,8 +5,8 @@
 <div class="index-page">
     <section class="hero">
         <h2>Find the Mystery</h2>
-        <form id="search-form">
-            <input type="text" id="search-input" placeholder="Search..." class="search-bar">
+        <form id="search-form" action="{% url 'search_tags' %}" method="get">
+            <input type="text" id="search-input" name="query" placeholder="Enter tags..." class="search-bar">
             <button type="submit" class="search-btn">Search</button>
         </form>
 

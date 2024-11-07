@@ -2,9 +2,8 @@ from django.contrib.auth import login, authenticate
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse
 from .models import Post, Comment
-from .forms import PostForm
-from django.db.models import Q
-from .wikidata_utils import fetch_wikidata_info
+from .forms import PostForm, CommentForm
+from .wikidata_utils import fetch_wikidata_tags, fetch_wikidata_info
 from django.contrib import messages
 
 # Create your views here.
@@ -32,7 +31,6 @@ def index(request):
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-
     comments = Comment.objects.filter(post=post).order_by('-created_at')
 
     tags = []
@@ -47,12 +45,23 @@ def post_detail(request, post_id):
             else:
                 tags.append((tag, None))
 
-    context = {
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            new_comment = form.save(commit=False)
+            new_comment.post = post
+            new_comment.user = request.user
+            new_comment.save()
+            return redirect('post_detail', post_id=post.id)  # Yönlendirme ekle
+    else:
+        form = CommentForm()
+
+    return render(request, 'postDetail.html', {
         'post': post,
         'comments': comments,
+        'form': form,
         'tags': tags,
-    }
-    return render(request, 'postDetail.html', context)
+    })
 
 
 def post_creation(request):
@@ -82,25 +91,19 @@ def post_creation(request):
     return render(request, 'postCreation.html', {'form': form})
 
 
-def search_posts(request):
-    query = request.GET.get('query')
-    if query:
-        tags = query.split(',')
-        posts = Post.objects.filter(Q(tags__icontains=tags))
-    else:
-        posts = Post.objects.all()
-    return render(request, 'index.html', {'posts': posts})
+def fetch_wikidata(request):
+    tags = request.GET.get('tags', '').strip("[]").split(",")
+    tags = [tag.strip().strip('"') for tag in tags]  # Cleaning tags
+    print(tags)
+    all_results = {}
 
+    for tag in tags:
+        results = fetch_wikidata_tags(tag)
+        if results:
+            all_results[tag] = results
 
-def fetch_wikidata_tag(request):
-    tag = request.GET.get('tag', '').strip()
-    if tag:
-        q_number, _ = fetch_wikidata_info([tag])
-        if q_number:
-            return JsonResponse({'qNumber': q_number})
-    return JsonResponse({'qNumber': None})
+    return JsonResponse({'results': all_results})
 
-    #return JsonResponse({'results': []})
 
 
 def edit_post(request, post_id):
@@ -121,3 +124,14 @@ def edit_post(request, post_id):
         form = PostForm(instance=post)
 
     return render(request, 'editPost.html', {'form': form, 'post': post})
+
+
+def search_tags(request):
+    results = []
+    query = request.GET.get('query', None)
+
+    if query:
+        results = fetch_wikidata_tags(query)
+        print("Fetched Tags:", results)
+
+    return JsonResponse({'results': results, 'query': query})

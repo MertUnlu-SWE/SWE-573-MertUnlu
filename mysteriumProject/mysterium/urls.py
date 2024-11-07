@@ -8,6 +8,6 @@ urlpatterns = [
     path('postCreation/', views.post_creation, name='postCreation'),
     path('post/<int:post_id>/', views.post_detail, name='post_detail'),
     path('post/<int:post_id>/edit/', views.edit_post, name='edit_post'),
-    path('postCreation/', views.post_creation, name='postCreation'),
-    path('fetch_wikidata/', views.fetch_wikidata_tag, name='fetch_wikidata'),
+    path('search/', views.search_tags, name='search_tags'),
+    path('fetch_wikidata/', views.fetch_wikidata, name='fetch_wikidata'),
 ]

@@ -1,5 +1,5 @@
-$(document).ready(function(){
-    $('#search-form').on('submit', function(event){
+$(document).ready(function () {
+    $('#search-form').on('submit', function (event) {
         event.preventDefault();
 
         let query = $('#search-input').val().trim();
@@ -8,26 +8,31 @@ $(document).ready(function(){
             console.log('Gönderilen Etiketler:', tags);
 
             $.ajax({
-                url: '/fetch_wikidata/',  // Django URL
+                url: '/fetch_wikidata/',
                 data: { 'tags': JSON.stringify(tags) },
                 method: 'GET',
-                success: function(data) {
-                    console.log('Gelen Yanıt:', data);
-                    let results = data.results;
+                success: function (data) {
+                    console.log('Gelen Yanıtın Yapısı:', JSON.stringify(data));
+            
                     $('#search-results').empty();
-
-                    if (results.length > 0) {
-                        results.forEach(function(item){
-                            $('#search-results').append(`<li><a href="${item[0]}" target="_blank">${item[1]}</a></li>`);
-                        });
+                    if (data && data.results) {
+                        for (let tag in data.results) {
+                            $('#search-results').append(`<li><strong>${tag}</strong></li>`);
+                            data.results[tag].forEach(function (item) {
+                                $('#search-results').append(
+                                    `<li><a href="${item[0]}" target="_blank">${item[1]}</a></li>`
+                                );
+                            });
+                        }
                     } else {
                         $('#search-results').append('<li>No results found.</li>');
                     }
-
+            
                     $('#search-results-container').removeClass('hidden');
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.log('Hata:', error);
+                    $('#search-results').empty();
                     $('#search-results').append('<li>Error fetching data. Please try again.</li>');
                     $('#search-results-container').removeClass('hidden');
                 }
@@ -35,7 +40,7 @@ $(document).ready(function(){
         }
     });
 
-    $('#close-search-results').on('click', function(){
+    $('#close-search-results').on('click', function () {
         $('#search-results-container').addClass('hidden');
     });
 });

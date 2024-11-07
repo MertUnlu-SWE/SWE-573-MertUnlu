@@ -51,12 +51,14 @@ document.addEventListener('DOMContentLoaded', function () {
         fetch(`/fetch_wikidata/?tag=${encodeURIComponent(tag)}`)
             .then(response => response.json())
             .then(data => {
-                if (data.qNumber) {
+                console.log("Received Data from Backend:", data);  // Ekleme
+                if (data && data.qNumber) {
                     addTag(tag, data.qNumber);
                 } else {
+                    console.warn("No qNumber found for tag:", tag);  // Uyarı ekleyin
                     addTag(tag);
                 }
             })
             .catch(error => console.error('Error fetching Wikidata tag:', error));
-    }
+    }    
 });
