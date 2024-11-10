@@ -52,11 +52,11 @@
 
             <!-- UpVote/DownVote Buttons -->
             <div class="d-flex mb-4">
-                <button class="btn btn-outline-primary me-2">
-                    <i class="bi bi-hand-thumbs-up"></i> Upvote
+                <button id="upvote-btn" class="btn btn-outline-primary">
+                    Upvote <span id="upvote-count">{{ post.upvotes }}</span>
                 </button>
-                <button class="btn btn-outline-danger">
-                    <i class="bi bi-hand-thumbs-down"></i> Downvote
+                <button id="downvote-btn" class="btn btn-outline-danger">
+                    Downvote <span id="downvote-count">{{ post.downvotes }}</span>
                 </button>
             </div>
 
@@ -86,13 +86,13 @@
                     <strong>{{ comment.user.username }}</strong>
                     <p>{{ comment.text }}</p>
                     <small>{{ comment.created_at }}</small>
-                    <!-- Upvote/Downvote Buttons -->
+                    <!-- Unique Upvote/Downvote Buttons for Each Comment -->
                     <div class="d-flex mb-4">
-                        <button class="btn btn-outline-primary me-2">
-                            <i class="bi bi-hand-thumbs-up"></i> Upvote
+                        <button id="upvote-btn-{{ comment.id }}" class="btn btn-outline-primary">
+                            Upvote <span id="upvote-count-{{ comment.id }}">{{ comment.upvotes }}</span>
                         </button>
-                        <button class="btn btn-outline-danger">
-                            <i class="bi bi-hand-thumbs-down"></i> Downvote
+                        <button id="downvote-btn-{{ comment.id }}" class="btn btn-outline-danger">
+                            Downvote <span id="downvote-count-{{ comment.id }}">{{ comment.downvotes }}</span>
                         </button>
                     </div>
                 </div>
@@ -103,4 +103,62 @@
         </div>
     </div>
 </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        console.log("Document is ready");
+    
+        // Handle post upvote/downvote
+        $('#upvote-btn').click(function() {
+            $.ajax({
+                url: '/post/{{ post.id }}/upvote/',
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                success: function(data) {
+                    $('#upvote-count').text(data.upvotes);
+                }
+            });
+        });
+    
+        $('#downvote-btn').click(function() {
+            $.ajax({
+                url: '/post/{{ post.id }}/downvote/',
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                success: function(data) {
+                    $('#downvote-count').text(data.downvotes);
+                }
+            });
+        });
+    
+        // Handle comment upvote/downvote
+        {% for comment in comments %}
+        $('#upvote-btn-{{ comment.id }}').click(function() {
+            $.ajax({
+                url: '/comment/{{ comment.id }}/upvote/',
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                success: function(data) {
+                    $('#upvote-count-{{ comment.id }}').text(data.upvotes);
+                }
+            });
+        });
+    
+        $('#downvote-btn-{{ comment.id }}').click(function() {
+            $.ajax({
+                url: '/comment/{{ comment.id }}/downvote/',
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                success: function(data) {
+                    $('#downvote-count-{{ comment.id }}').text(data.downvotes);
+                }
+            });
+        });
+        {% endfor %}
+    });
+    
+</script>
+
 {% endblock %}

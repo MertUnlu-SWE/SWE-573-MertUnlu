@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse
 from .models import Post, Comment
@@ -7,7 +9,27 @@ from .wikidata_utils import fetch_wikidata_tags, fetch_wikidata_info
 from django.contrib import messages
 
 # Create your views here.
-
+def register(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        email = request.POST['email']
+        password = request.POST['password']
+        
+        # Create the user and set additional fields
+        user = User.objects.create_user(username=username, email=email, password=password)
+        user.first_name = first_name
+        user.last_name = last_name
+        user.save()
+        
+        # Specify the backend explicitly
+        backend = settings.AUTHENTICATION_BACKENDS[0]  # Use the first backend, adjust if necessary
+        login(request, user, backend=backend)
+        
+        return redirect('index')  # Redirect to a desired page after registration
+    
+    return render(request, 'login.html')
 
 def login_view(request):
     if request.method == 'POST':
@@ -25,7 +47,7 @@ def login_view(request):
 
 
 def index(request):
-    posts = Post.objects.all()
+    posts = Post.objects.all().order_by('-upvotes')  # Sorting by upvotes
     return render(request, 'index.html', {'posts': posts})
 
 
@@ -63,6 +85,43 @@ def post_detail(request, post_id):
         'tags': tags,
     })
 
+def vote_post(request, post_id, vote_type):
+    post = Post.objects.get(id=post_id)
+    
+    # Check if the user has already voted
+    if request.user in post.voted_users.all():
+        return JsonResponse({'error': 'You have already voted on this post.'}, status=403)
+    
+    # Increment the upvote or downvote count
+    if vote_type == 'upvote':
+        post.upvotes += 1
+    elif vote_type == 'downvote':
+        post.downvotes += 1
+    post.save()
+    
+    # Add the user to the voted_users field to track that they have voted
+    post.voted_users.add(request.user)
+    
+    return JsonResponse({'upvotes': post.upvotes, 'downvotes': post.downvotes})
+
+def vote_comment(request, comment_id, vote_type):
+    comment = Comment.objects.get(id=comment_id)
+    
+    # Check if the user has already voted
+    if request.user in comment.voted_users.all():
+        return JsonResponse({'error': 'You have already voted on this comment.'}, status=403)
+    
+    # Increment the upvote or downvote count
+    if vote_type == 'upvote':
+        comment.upvotes += 1
+    elif vote_type == 'downvote':
+        comment.downvotes += 1
+    comment.save()
+    
+    # Add the user to the voted_users field to track that they have voted
+    comment.voted_users.add(request.user)
+    
+    return JsonResponse({'upvotes': comment.upvotes, 'downvotes': comment.downvotes})
 
 def post_creation(request):
     if request.method == 'POST':
