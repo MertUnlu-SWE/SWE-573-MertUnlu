@@ -5,7 +5,7 @@ FROM python:3.12.7
 WORKDIR /app
 
 # Gereken paketleri yükleyin
-COPY requirementsprojects.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 
