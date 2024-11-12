@@ -30,9 +30,8 @@ SECRET_KEY = 'django-insecure-etebo%)_nxf1pozgvb1=1$)+5cr#hzb3*#lftdx&eg!%5__4si
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG =  os.getenv("IS_DEVELOPMENT", True)
 
-ALLOWED_HOSTS = [
-    os.getenv("localhost", "127.0.0.1")
-]
+#ALLOWED_HOSTS = [os.getenv("localhost", "127.0.0.1")]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -81,19 +80,29 @@ WSGI_APPLICATION = 'mysteriumProject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.postgresql',
+#        'NAME': 'postgres',
+#        'USER': 'mysteriumMert',
+#        'PASSWORD': 'Mert539Unlu',
+#        'HOST': 'mysterium-db.cj6g0u6gkb0e.eu-north-1.rds.amazonaws.com',
+#        'PORT': '5432'
+#    }
+#}
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'mysteriumMert',
-        'PASSWORD': 'Mert539Unlu',
-        'HOST': 'mysterium-db.cj6g0u6gkb0e.eu-north-1.rds.amazonaws.com',
-        'PORT': '5432'
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
 
-#AUTH_USER_MODEL = 'users.CustomUser'
 AUTHENTICATION_BACKENDS = [
     'mysterium.backends.EmailBackend',  # Adjust this to match your app name
     'django.contrib.auth.backends.ModelBackend',
@@ -135,9 +144,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Statik dosyalar için kök dizin
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Özel statik dosyalar
+
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+
+if DEBUG:
+    import mimetypes
+    mimetypes.add_type("text/css", ".css", True)
+
 
 
 # Default primary key field type

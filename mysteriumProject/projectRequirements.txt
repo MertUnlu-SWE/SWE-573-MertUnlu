@@ -1,5 +1,7 @@
 asgiref==3.8.1
 Django==5.1.2
+requests
+SPARQLWrapper
 pillow==11.0.0
 psycopg==3.2.3
 psycopg-binary==3.2.3
