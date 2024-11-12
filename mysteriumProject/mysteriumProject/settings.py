@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Media
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -28,11 +28,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 SECRET_KEY = 'django-insecure-etebo%)_nxf1pozgvb1=1$)+5cr#hzb3*#lftdx&eg!%5__4si'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG =  os.getenv("IS_DEVELOPMENT", True)
+DEBUG =  os.getenv("IS_DEVELOPMENT", False)
 
 #ALLOWED_HOSTS = [os.getenv("localhost", "127.0.0.1")]
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-
+#ALLOWED_HOSTS = ["13.53.116.156"]
+ALLOWED_HOSTS = ['13.53.116.156', '127.0.0.1', 'localhost', '[::1]']
 
 # Application definition
 
@@ -148,6 +148,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Statik dosyalar için kö
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Özel statik dosyalar
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+
+#SECURE_SSL_REDIRECT = True
+#SECURE_HSTS_SECONDS = 3600  # 1 saat boyunca HTTPS kullanılır
+#SECURE_BROWSER_XSS_FILTER = True
+#SECURE_CONTENT_TYPE_NOSNIFF = True
+
 
 if DEBUG:
     import mimetypes

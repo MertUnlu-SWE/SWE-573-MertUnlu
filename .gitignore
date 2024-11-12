@@ -34,3 +34,4 @@ node_modules/
 # Gereksiz OS dosyaları
 Thumbs.db
 ehthumbs.db
+/mysteriumProject/staticfiles

@@ -2,7 +2,7 @@
 FROM python:3.12.7
 
 # Çalışma dizinini ayarlayın
-WORKDIR /app
+WORKDIR /
 
 # Gereken paketleri yükleyin
 COPY projectRequirements.txt requirements.txt
