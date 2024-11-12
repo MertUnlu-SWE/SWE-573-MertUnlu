@@ -2,10 +2,10 @@
 FROM python:3.12.7
 
 # Çalışma dizinini ayarlayın
-WORKDIR /
+WORKDIR /app
 
 # Gereken paketleri yükleyin
-COPY projectRequirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 # Proje dosyalarını kopyalayın
