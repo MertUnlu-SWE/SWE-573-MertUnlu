@@ -80,18 +80,9 @@ WSGI_APPLICATION = 'mysteriumProject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'mysteriumMert',
-        'PASSWORD': 'Mert539Unlu',
-        'HOST': 'mysterium-db.cj6g0u6gkb0e.eu-north-1.rds.amazonaws.com',
-        'PORT': '5432'
-    }
-}
+#DATABASES = {'default': {'ENGINE': 'django.db.backends.postgresql','NAME': 'postgres','USER': 'mysteriumMert','PASSWORD': 'Mert539Unlu','HOST': 'mysterium-db.cj6g0u6gkb0e.eu-north-1.rds.amazonaws.com','PORT': '5432'}}
 
-#DATABASES = {'default': {'ENGINE': 'django.db.backends.postgresql','NAME': os.getenv('DB_NAME'),'USER': os.getenv('DB_USER'),'PASSWORD': os.getenv('DB_PASSWORD'),'HOST': os.getenv('DB_HOST'),'PORT': os.getenv('DB_PORT'),}}
+DATABASES = {'default': {'ENGINE': 'django.db.backends.postgresql','NAME': os.getenv('DB_NAME'),'USER': os.getenv('DB_USER'),'PASSWORD': os.getenv('DB_PASSWORD'),'HOST': os.getenv('DB_HOST'),'PORT': os.getenv('DB_PORT'),}}
 
 
 AUTHENTICATION_BACKENDS = [
