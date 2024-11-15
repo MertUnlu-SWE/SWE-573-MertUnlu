@@ -4,9 +4,9 @@ FROM python:3.12.7
 # Çalışma dizinini ayarlayın
 WORKDIR /app
 
-# Gereken paketleri yükleyin
+# Bağımlılıkları yükleyin
 COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 
 # Proje dosyalarını kopyalayın
@@ -22,5 +22,10 @@ ENV DB_PORT=5432
 # Statik dosyaları toplayın
 RUN python manage.py collectstatic --noinput
 
+EXPOSE 8000
+
+# Uygulama başlatma komutu
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "mysteriumProject.wsgi:application"]
+
 # Django komutlarını çalıştırmak için entrypoint ayarlayın
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+#CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

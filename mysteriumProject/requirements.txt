@@ -1,5 +1,6 @@
 asgiref==3.8.1
 Django==5.1.2
+gunicorn
 requests
 SPARQLWrapper
 pillow==11.0.0
