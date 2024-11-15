@@ -32,7 +32,7 @@ DEBUG =  os.getenv("IS_DEVELOPMENT", False)
 
 #ALLOWED_HOSTS = [os.getenv("localhost", "127.0.0.1")]
 #ALLOWED_HOSTS = ["13.53.116.156"]
-ALLOWED_HOSTS = ['13.53.116.156', '127.0.0.1', 'localhost', '[::1]']
+ALLOWED_HOSTS = ['swe-573-mertunlu.onrender.com', '13.53.116.156', '127.0.0.1', 'localhost', '[::1]']
 
 # Application definition
 
