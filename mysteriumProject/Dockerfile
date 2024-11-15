@@ -2,7 +2,7 @@
 FROM python:3.12.7
 
 # Çalışma dizinini ayarlayın
-WORKDIR /app
+WORKDIR /app/mysteriumProject
 
 # Bağımlılıkları yükleyin
 COPY requirements.txt requirements.txt

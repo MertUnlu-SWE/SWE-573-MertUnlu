@@ -17,10 +17,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Media
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -32,7 +28,7 @@ DEBUG =  os.getenv("IS_DEVELOPMENT", True)
 
 #ALLOWED_HOSTS = [os.getenv("localhost", "127.0.0.1")]
 #ALLOWED_HOSTS = ["13.53.116.156"]
-ALLOWED_HOSTS = ['swe-573-mertunlu.onrender.com', '13.53.116.156', '127.0.0.1', 'localhost', '[::1]']
+ALLOWED_HOSTS = ['swe-573-mertunlu.onrender.com', '91.93.225.91/32', '13.53.116.156', '127.0.0.1', 'localhost', '[::1]']
 
 # Application definition
 
@@ -131,6 +127,10 @@ USE_I18N = True
 
 USE_TZ = True
 
+
+# Media
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
