@@ -19,6 +19,8 @@ ENV DB_PASSWORD=Mert539Unlu
 ENV DB_HOST=mysterium-db.cj6g0u6gkb0e.eu-north-1.rds.amazonaws.com
 ENV DB_PORT=5432
 
+RUN pip install whitenoise
+
 # Statik dosyaları toplayın
 RUN python manage.py collectstatic --noinput
 

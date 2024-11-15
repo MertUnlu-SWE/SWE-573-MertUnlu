@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,11 +25,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-etebo%)_nxf1pozgvb1=1$)+5cr#hzb3*#lftdx&eg!%5__4si'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG =  os.getenv("IS_DEVELOPMENT", True)
+DEBUG =  os.getenv("IS_DEVELOPMENT", False)
 
 #ALLOWED_HOSTS = [os.getenv("localhost", "127.0.0.1")]
 #ALLOWED_HOSTS = ["13.53.116.156"]
-ALLOWED_HOSTS = ['swe-573-mertunlu.onrender.com', '91.93.225.91/32', '13.53.116.156', '127.0.0.1', 'localhost', '[::1]']
+ALLOWED_HOSTS = [
+    'swe-573-mertunlu.onrender.com', 
+    '91.93.225.91/32', 
+    '13.53.116.156', 
+    '127.0.0.1', 
+    'localhost', 
+    '[::1]'
+]
 
 # Application definition
 
@@ -44,13 +52,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'mysteriumProject.urls'
@@ -78,6 +86,7 @@ WSGI_APPLICATION = 'mysteriumProject.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 #DATABASES = {'default': {'ENGINE': 'django.db.backends.postgresql','NAME': 'postgres','USER': 'mysteriumMert','PASSWORD': 'Mert539Unlu','HOST': 'mysterium-db.cj6g0u6gkb0e.eu-north-1.rds.amazonaws.com','PORT': '5432'}}
+load_dotenv()
 
 DATABASES = {
     'default': {
@@ -87,6 +96,9 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT', '5432'),
+        'OPTIONS': {
+            'sslmode': 'require',  # AWS RDS için SSL kullanımı
+        },
     }
 }
 
