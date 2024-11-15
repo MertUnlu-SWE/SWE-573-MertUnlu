@@ -26,7 +26,11 @@
         <div class="glider">
             {% for post in posts %}
             <div class="card" style="width: 18rem;">
-                <img src="{{ post.object_image.url }}" class="card-img-top" alt="Mystery Image">
+                {% if post.object_image %}
+                    <img src="{{ post.object_image.url }}" class="card-img-top" alt="Mystery Image">
+                {% else %}
+                    <img src="{% static 'images/default-image.jpg' %}" class="card-img-top" alt="Default Image">
+                {% endif %}
                 <div class="card-body">
                     <h5 class="card-title">{{ post.title }}</h5>
                     <p class="card-text">{{ post.description|truncatewords:10 }}</p>
