@@ -24,6 +24,9 @@ RUN pip install whitenoise
 # Statik dosyaları toplayın
 RUN python manage.py collectstatic --noinput
 
+# Medya dosyaları için dizin oluştur
+RUN mkdir -p /opt/render/project/src/media
+
 EXPOSE 8000
 
 # Uygulama başlatma komutu
