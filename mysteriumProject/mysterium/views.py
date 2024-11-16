@@ -1,5 +1,6 @@
 from django.conf import settings
-from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse
@@ -45,6 +46,13 @@ def login_view(request):
             return render(request, 'login.html', {'error': 'Invalid credentials'})
     return render(request, 'login.html')
 
+@login_required
+def profile_view(request):
+    return render(request, 'profile.html', {'user': request.user})
+
+def logout_view(request):
+    logout(request)
+    return redirect('index')
 
 def index(request):
     posts = Post.objects.all().order_by('-upvotes')  # Sorting by upvotes

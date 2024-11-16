@@ -31,6 +31,12 @@
                         <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
                         <li class="nav-item"><a class="nav-link" href="#">Categories</a></li>
                         <li class="nav-item"><a class="nav-link" href="#">Terms</a></li>
+                        {% if user.is_authenticated %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">My Profile</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Log Out</a></li>
+                        {% else %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Log In</a></li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>
