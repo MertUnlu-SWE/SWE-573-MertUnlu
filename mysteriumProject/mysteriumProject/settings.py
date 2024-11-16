@@ -38,6 +38,12 @@ ALLOWED_HOSTS = [
     '[::1]'
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://swe-573-mertunlu.onrender.com',
+    'http://localhost',
+]
+
+
 # Application definition
 
 INSTALLED_APPS = [
