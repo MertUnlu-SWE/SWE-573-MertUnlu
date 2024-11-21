@@ -10,6 +10,16 @@ h2{
     color: antiquewhite;
 }
 
+.solved {
+    color: green;
+    font-weight: bold;
+}
+
+.unsolved {
+    color: red;
+    font-weight: bold;
+}
+
 .search-results-container {
     position: absolute;
     top: 50px;

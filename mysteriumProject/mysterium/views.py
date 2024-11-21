@@ -131,6 +131,19 @@ def vote_comment(request, comment_id, vote_type):
     
     return JsonResponse({'upvotes': comment.upvotes, 'downvotes': comment.downvotes})
 
+def mark_comment_as_solved(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    # Check if the user is the creator of the post associated with the comment
+    if request.user != comment.post.user:
+        return JsonResponse({'error': 'You are not authorized to mark this comment as solved.'}, status=403)
+
+    # Toggle the solved status of the comment
+    comment.is_solved = not comment.is_solved
+    comment.save()
+
+    return JsonResponse({'is_solved': comment.is_solved})
+
 def post_creation(request):
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
@@ -159,17 +172,22 @@ def post_creation(request):
 
 
 def fetch_wikidata(request):
-    tags = request.GET.get('tags', '').strip("[]").split(",")
-    tags = [tag.strip().strip('"') for tag in tags]  # Cleaning tags
-    print(tags)
-    all_results = {}
+    try:
+        tags = request.GET.get('tags', '').strip("[]").split(",")
+        tags = [tag.strip().strip('"') for tag in tags]
+        all_results = {}
 
-    for tag in tags:
-        results = fetch_wikidata_tags(tag)
-        if results:
-            all_results[tag] = results
+        for tag in tags:
+            try:
+                results = fetch_wikidata_tags(tag)
+                if results:
+                    all_results[tag] = results
+            except Exception as e:
+                all_results[tag] = f"Error fetching data for tag '{tag}': {str(e)}"
 
-    return JsonResponse({'results': all_results})
+        return JsonResponse({'results': all_results})
+    except Exception as e:
+        return JsonResponse({'error': f"Failed to fetch Wikidata information: {str(e)}"}, status=500)
 
 
 

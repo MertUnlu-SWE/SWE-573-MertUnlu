@@ -29,3 +29,4 @@ class Comment(models.Model):
     downvotes = models.IntegerField(default=0)
     voted_users = models.ManyToManyField(User, related_name="voted_comments", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_solved = models.BooleanField(default=False)

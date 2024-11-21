@@ -13,6 +13,7 @@ urlpatterns = [
     path('post/<int:post_id>/', views.post_detail, name='post_detail'),
     path('post/<int:post_id>/<str:vote_type>/', views.vote_post, name='vote_post'),
     path('comment/<int:comment_id>/<str:vote_type>/', views.vote_comment, name='vote_comment'),
+    path('comment/<int:comment_id>/mark_as_solved/', views.mark_comment_as_solved, name='mark_comment_as_solved'),
     path('search/', views.search_tags, name='search_tags'),
     path('fetch_wikidata/', views.fetch_wikidata, name='fetch_wikidata'),
 ]

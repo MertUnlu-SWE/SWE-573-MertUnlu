@@ -86,6 +86,19 @@
                     <strong>{{ comment.user.username }}</strong>
                     <p>{{ comment.text }}</p>
                     <small>{{ comment.created_at }}</small>
+
+                    <!-- Solved Status -->
+                    {% if comment.is_solved %}
+                        <span class="badge bg-success">Solved</span>
+                    {% endif %}
+
+                    <!-- Mark as Solved Button -->
+                    {% if request.user == post.user %}
+                        <button class="btn btn-outline-success mark-as-solved-btn" data-comment-id="{{ comment.id }}">
+                        {{ 'Mark as Unsolved' if comment.is_solved else 'Mark as Solved' }}
+                        </button>
+                    {% endif %}
+
                     <!-- Unique Upvote/Downvote Buttons for Each Comment -->
                     <div class="d-flex mb-4">
                         <button id="upvote-btn-{{ comment.id }}" class="btn btn-outline-primary">
@@ -105,6 +118,7 @@
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="{% static 'js/comments.js' %}"></script>
 
 <script>
     $(document).ready(function() {

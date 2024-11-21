@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const tagsContainer = document.createElement('div');
     tagsContainer.classList.add('tags-input');
     tagInput.parentNode.insertBefore(tagsContainer, tagInput);
-    
+
     let tags = [];
 
 
@@ -29,36 +29,43 @@ document.addEventListener('DOMContentLoaded', function () {
                     formattedTag += ` (${qNumber})`;
                 }
             }
-    
+
             tags.push(formattedTag);
             const tagElement = document.createElement('span');
             tagElement.classList.add('tag');
             tagElement.innerHTML = `${formattedTag} <button type="button">&times;</button>`;
-    
+
             tagElement.querySelector('button').addEventListener('click', function () {
                 tags = tags.filter(t => t !== formattedTag);
                 tagElement.remove();
                 tagInput.value = tags.join(', ');
             });
-    
+
             tagsContainer.appendChild(tagElement);
             tagInput.value = tags.join(', ');
         }
-    }        
+    }
 
 
     function fetchWikidataTag(tag) {
         fetch(`/fetch_wikidata/?tag=${encodeURIComponent(tag)}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch tag info. Status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
-                console.log("Received Data from Backend:", data);  // Ekleme
                 if (data && data.qNumber) {
                     addTag(tag, data.qNumber);
                 } else {
-                    console.warn("No qNumber found for tag:", tag);  // Uyarı ekleyin
+                    console.warn("No qNumber found for tag:", tag);
                     addTag(tag);
                 }
             })
-            .catch(error => console.error('Error fetching Wikidata tag:', error));
-    }    
+            .catch(error => {
+                console.error('Error fetching Wikidata tag:', error);
+                alert(`Error fetching Wikidata tag: ${error.message}`);
+            });
+    }
 });

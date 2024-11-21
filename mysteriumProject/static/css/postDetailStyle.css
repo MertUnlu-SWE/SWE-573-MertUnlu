@@ -10,6 +10,16 @@ h2, h4{
     color: aliceblue !important;
 }
 
+.solved {
+    color: green;
+    font-weight: bold;
+}
+
+.unsolved {
+    color: red;
+    font-weight: bold;
+}
+
 .semantic-tags {
     margin-top: 20px;
 }
