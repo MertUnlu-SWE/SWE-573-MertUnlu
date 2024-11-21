@@ -34,17 +34,29 @@ def register(request):
 
 def login_view(request):
     if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
-        user = authenticate(request, username=email, password=password)
-        if user is not None:
-            print(f"Authenticated: {user}")
-            login(request, user)
-            return redirect('index')
-        else:
-            print("Invalid credentials")
-            return render(request, 'login.html', {'error': 'Invalid credentials'})
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+        
+        # Check if both fields are provided
+        if not email or not password:
+            return render(request, 'login.html', {'error': 'Email and password are required.'})
+        
+        try:
+            # Authenticate the user
+            user = authenticate(request, username=email, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('index')
+            else:
+                return render(request, 'login.html', {'error': 'Invalid email or password.'})
+        except Exception as e:
+            # Log the error for debugging purposes
+            print(f"Login error: {e}")
+            return render(request, 'login.html', {'error': 'An unexpected error occurred. Please try again later.'})
+    
+    # GET request (load the login page)
     return render(request, 'login.html')
+
 
 @login_required
 def profile_view(request):
@@ -55,8 +67,11 @@ def logout_view(request):
     return redirect('index')
 
 def index(request):
-    posts = Post.objects.all().order_by('-upvotes')  # Sorting by upvotes
-    return render(request, 'index.html', {'posts': posts})
+    try:
+        posts = Post.objects.all().order_by('-upvotes')  # Ensure no database issues
+        return render(request, 'index.html', {'posts': posts})
+    except Exception as e:
+        return JsonResponse({'error': f"Index view error: {str(e)}"}, status=500)
 
 
 def post_detail(request, post_id):

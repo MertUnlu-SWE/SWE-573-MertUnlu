@@ -34,7 +34,9 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ post.title }}</h5>
                     <p class="card-text">{{ post.description|truncatewords:10 }}</p>
-                    <p>Status: <span class="{{ 'solved' if post.is_solved else 'unsolved' }}">{{ 'Solved' if post.is_solved else 'Unsolved' }}</span></p>
+                    <p>Status: <span class="{% if post.is_solved %}solved{% else %}unsolved{% endif %}">
+                        {% if post.is_solved %}Solved{% else %}Unsolved{% endif %}
+                    </span></p>
                     <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">Read More</a>
                 </div>
             </div>
