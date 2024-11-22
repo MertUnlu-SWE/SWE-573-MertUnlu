@@ -30,6 +30,17 @@
                 <div class="post-description p-3 bg-light rounded mb-4">
                     <p class="mb-0">{{ post.description }}</p>
                 </div>
+
+                <!-- Additional Descriptive Details -->
+                <div class="post-details">
+                    <p><strong>Material:</strong> {{ post.material }}</p>
+                    <p><strong>Dimensions:</strong> {{ post.dimensions }}</p>
+                    <p><strong>Weight:</strong> {{ post.weight }}</p>
+                    <p><strong>Condition:</strong> {{ post.condition }}</p>
+                    <p><strong>Markings:</strong> {{ post.markings }}</p>
+                    <p><strong>Historical Context:</strong> {{ post.historical_context }}</p>
+                    <p><strong>Distinctive Features:</strong> {{ post.distinctive_features }}</p>
+                </div>
     
                 <!-- Semantic Tags -->
                 {% if tags %}
@@ -99,15 +110,14 @@
                         <small>{{ comment.created_at }}</small>
     
                         <div class="d-flex align-items-center mt-2">
-                            <!-- Solved Status -->
                             {% if comment.is_solved %}
                                 <span class="badge bg-success me-2">Solved</span>
                             {% endif %}
                     
-                            <!-- Mark as Solved Button -->
+                            <!-- Toggle Mark as Solved/Unsolved -->
                             {% if request.user == post.user %}
                                 <button class="btn btn-outline-success btn-sm mark-as-solved-btn" data-comment-id="{{ comment.id }}">
-                                    {% if comment.is_solved %}
+                                    {% if post.solved_comment and post.solved_comment.id == comment.id %}
                                         Mark as Unsolved
                                     {% else %}
                                         Mark as Solved

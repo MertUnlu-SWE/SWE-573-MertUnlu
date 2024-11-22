@@ -22,6 +22,42 @@
                 {{ form.description }}
             </div>
 
+            <!-- Descriptive Fields -->
+            <div class="mb-3">
+                <label for="material" class="form-label">Material</label>
+                <input type="text" name="material" class="form-control" placeholder="e.g., Metal, Plastic">
+            </div>
+
+            <div class="mb-3">
+                <label for="dimensions" class="form-label">Dimensions</label>
+                <input type="text" name="dimensions" class="form-control" placeholder="e.g., 10cm x 5cm x 2cm">
+            </div>
+
+            <div class="mb-3">
+                <label for="weight" class="form-label">Weight</label>
+                <input type="text" name="weight" class="form-control" placeholder="e.g., 500g">
+            </div>
+
+            <div class="mb-3">
+                <label for="condition" class="form-label">Condition</label>
+                <input type="text" name="condition" class="form-control" placeholder="e.g., New, Worn, Damaged">
+            </div>
+
+            <div class="mb-3">
+                <label for="markings" class="form-label">Markings or Text</label>
+                <textarea name="markings" class="form-control" rows="3" placeholder="e.g., Symbols, Numbers, Inscriptions"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="historical_context" class="form-label">Historical Context</label>
+                <textarea name="historical_context" class="form-control" rows="3" placeholder="e.g., Likely from the 18th century"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="distinctive_features" class="form-label">Distinctive Features</label>
+                <textarea name="distinctive_features" class="form-control" rows="3" placeholder="e.g., Unique patterns, unusual texture"></textarea>
+            </div>
+
             <!-- Image Upload -->
             <div class="image-upload mb-3">
                 {{ form.object_image.label_tag }}

@@ -8,6 +8,7 @@ from .models import Post, Comment
 from .forms import PostForm, CommentForm
 from .wikidata_utils import fetch_wikidata_tags, fetch_wikidata_info
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 def register(request):
@@ -154,6 +155,7 @@ def mark_post_as_solved(request, post_id, comment_id):
 
         # Sadece post sahibi işlem yapabilir
         if request.user != post.user:
+            print(f"Unauthorized Attempt by User: {request.user.username}")
             return JsonResponse({'error': 'You are not authorized to mark this post as solved.'}, status=403)
 
         # Post'u çözülmüş olarak işaretleyin ve doğru yorumu kaydedin
@@ -172,21 +174,26 @@ def mark_post_as_solved(request, post_id, comment_id):
         })
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
+
 @login_required
 def unmark_post_as_solved(request, post_id):
+    print("Unmark Called")  # Debug log
+    print(f"Request Method: {request.method}, Post ID: {post_id}")
     if request.method == 'POST':
         post = get_object_or_404(Post, id=post_id)
+        print(f"Post Found: {post.id}, Solved Status: {post.is_solved}")
 
-        # Sadece post sahibi işlem yapabilir
         if request.user != post.user:
+            print(f"Unauthorized Attempt by User: {request.user.username}")
             return JsonResponse({'error': 'You are not authorized to unmark this post as solved.'}, status=403)
 
-        # Çözüm durumunu sıfırlayın
         post.is_solved = False
         post.solved_comment = None
         post.save()
+        print(f"Post Updated: Solved Status: {post.is_solved}")
 
         return JsonResponse({'post_is_solved': post.is_solved})
+    print("Invalid Request Method")
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
 
@@ -196,6 +203,15 @@ def post_creation(request):
         if form.is_valid():
             post = form.save(commit=False)
             post.user = request.user
+
+            # Save additional descriptive fields
+            post.material = form.cleaned_data.get('material')
+            post.dimensions = form.cleaned_data.get('dimensions')
+            post.weight = form.cleaned_data.get('weight')
+            post.condition = form.cleaned_data.get('condition')
+            post.markings = form.cleaned_data.get('markings')
+            post.historical_context = form.cleaned_data.get('historical_context')
+            post.distinctive_features = form.cleaned_data.get('distinctive_features')
 
             # Handle tags and Wikidata integration
             tags = form.cleaned_data['tags']
@@ -215,6 +231,7 @@ def post_creation(request):
         form = PostForm()
 
     return render(request, 'postCreation.html', {'form': form})
+
 
 
 def fetch_wikidata(request):
@@ -240,7 +257,7 @@ def fetch_wikidata(request):
 def edit_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
-    # Owner of post
+    # Ensure only the owner of the post can edit it
     if request.user != post.user:
         messages.error(request, "You are not authorized to edit this post.")
         return redirect('post_detail', post_id=post.id)
@@ -248,13 +265,25 @@ def edit_post(request, post_id):
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
-            form.save()
+            updated_post = form.save(commit=False)
+            
+            # Explicitly update new fields (optional, for clarity)
+            updated_post.material = form.cleaned_data.get('material')
+            updated_post.dimensions = form.cleaned_data.get('dimensions')
+            updated_post.weight = form.cleaned_data.get('weight')
+            updated_post.condition = form.cleaned_data.get('condition')
+            updated_post.markings = form.cleaned_data.get('markings')
+            updated_post.historical_context = form.cleaned_data.get('historical_context')
+            updated_post.distinctive_features = form.cleaned_data.get('distinctive_features')
+
+            updated_post.save()
             messages.success(request, "Post updated successfully!")
             return redirect('post_detail', post_id=post.id)
     else:
         form = PostForm(instance=post)
 
     return render(request, 'editPost.html', {'form': form, 'post': post})
+
 
 
 def search_tags(request):

@@ -19,6 +19,44 @@ class CommentForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
+    material = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'e.g., Metal, Plastic'})
+    )
+    dimensions = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'e.g., 10cm x 5cm x 2cm'})
+    )
+    weight = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'e.g., 500g'})
+    )
+    condition = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'e.g., New, Worn, Damaged'})
+    )
+    markings = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': 3,
+            'placeholder': 'e.g., Symbols, Numbers, Inscriptions'
+        })
+    )
+    historical_context = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': 3,
+            'placeholder': 'e.g., Likely from the 18th century'
+        })
+    )
+    distinctive_features = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': 3,
+            'placeholder': 'e.g., Unique patterns, unusual texture'
+        })
+    )
+
     tags = forms.CharField(
         widget=forms.TextInput(
             attrs={'placeholder': 'Enter tags separated by commas'}),
@@ -28,7 +66,10 @@ class PostForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        fields = ['title', 'description', 'object_image', 'tags']
+        fields = [
+            'title', 'description', 'object_image', 'material', 'dimensions',
+            'weight', 'condition', 'markings', 'historical_context', 'distinctive_features', 'tags'
+        ]
 
     def clean_tags(self):
         tags = self.cleaned_data.get('tags', '')
@@ -44,8 +85,8 @@ class PostForm(forms.ModelForm):
                     tags_with_wikidata.append(tag)
             except Exception as e:
                 raise forms.ValidationError(
-                    f"Error processing tag '{tag}': {
-                        e}. Please try again or contact support."
+                    f"Error processing tag '{tag}': {e}. Please try again or contact support."
                 )
 
         return ','.join(tags_with_wikidata)
+
