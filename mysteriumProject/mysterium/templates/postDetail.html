@@ -5,119 +5,131 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/postDetailStyle.css' %}">
 <div class="container mt-5">
-    <!-- Post Title -->
-    <h2 class="text-center mb-4">{{post.title}}</h2>
-
-    <!-- Post Edit -->
-    {% if request.user == post.user %}
-    <a href="{% url 'edit_post' post.id %}" class="btn btn-warning mt-3">Edit Post</a>
-    {% endif %}
-
-    <!-- Post Content -->
-    <div class="row">
-        <!-- Post Image and Description -->
-        <div class="col-md-8 bg-white rounded mb-4">
-            <div class="d-flex align-items-center mb-3">
-                <img src="{% static 'images/AvatarTemplate.png' %}" alt="User Avatar" class="rounded-circle me-2"
-                    style="width: 50px; height: 50px;">
-                <span class="fw-bold">{{ post.user }}</span>
+    <div class="post-details" data-post-id="{{ post.id }}">
+        <!-- Post Title -->
+        <h2 class="text-center mb-4">{{post.title}}</h2>
+    
+        <!-- Post Edit -->
+        {% if request.user == post.user %}
+        <a href="{% url 'edit_post' post.id %}" class="btn btn-warning mt-3">Edit Post</a>
+        {% endif %}
+    
+        <!-- Post Content -->
+        <div class="row">
+            <!-- Post Image and Description -->
+            <div class="col-md-8 bg-white rounded mb-4">
+                <div class="d-flex align-items-center mb-3">
+                    <img src="{% static 'images/AvatarTemplate.png' %}" alt="User Avatar" class="rounded-circle me-2"
+                        style="width: 50px; height: 50px;">
+                    <span class="fw-bold">{{ post.user }}</span>
+                </div>
+                <div class="post-image mb-4">
+                    <img src="{{ post.object_image.url }}" alt="Post Image" class="img-fluid w-100 rounded"
+                        style="max-width: 400px; height: auto;">
+                </div>
+                <div class="post-description p-3 bg-light rounded mb-4">
+                    <p class="mb-0">{{ post.description }}</p>
+                </div>
+    
+                <!-- Semantic Tags -->
+                {% if tags %}
+                <div class="semantic-tags mb-4">
+                    <h5>Tags:</h5>
+                    <div class="tags-list">
+                        {% for tag_name, q_number in tags %}
+                        {% if q_number %}
+                        <a href="https://www.wikidata.org/wiki/Q{{ q_number }}" target="_blank"
+                            class="badge bg-primary text-decoration-none">
+                            {{ tag_name }}
+                        </a>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ tag_name }}</span>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+    
+                <!-- Display Post Solved Status -->
+                {% if post.is_solved %}
+                <div class="alert alert-success">
+                    <strong>Solved!</strong> This post was solved with the following comment:
+                    <blockquote class="mt-3">
+                        <strong>{{ post.solved_comment.user.username }}:</strong>
+                        {{ post.solved_comment.text }}
+                    </blockquote>
+                </div>
+                {% endif %}
+    
+                <!-- UpVote/DownVote Buttons -->
+                <div class="d-flex mb-4">
+                    <button id="upvote-btn" class="btn btn-outline-primary">
+                        Upvote <span id="upvote-count">{{ post.upvotes }}</span>
+                    </button>
+                    <button id="downvote-btn" class="btn btn-outline-danger">
+                        Downvote <span id="downvote-count">{{ post.downvotes }}</span>
+                    </button>
+                </div>
+    
+                <!-- Add Comment -->
+                <div class="add-comment mt-4">
+                    <h5>Add a Comment</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="comment-text" class="form-label">Text:</label>
+                            <textarea id="comment-text" name="text" class="form-control" rows="4"
+                                placeholder="Enter your comment..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mt-3">Submit</button>
+                    </form>
+                </div>
+    
             </div>
-            <div class="post-image mb-4">
-                <img src="{{ post.object_image.url }}" alt="Post Image" class="img-fluid w-100 rounded"
-                    style="max-width: 400px; height: auto;">
-            </div>
-            <div class="post-description p-3 bg-light rounded mb-4">
-                <p class="mb-0">{{ post.description }}</p>
-            </div>
-
-            <!-- Semantic Tags -->
-            {% if tags %}
-            <div class="semantic-tags mb-4">
-                <h5>Tags:</h5>
-                <div class="tags-list">
-                    {% for tag_name, q_number in tags %}
-                    {% if q_number %}
-                    <a href="https://www.wikidata.org/wiki/Q{{ q_number }}" target="_blank"
-                        class="badge bg-primary text-decoration-none">
-                        {{ tag_name }}
-                    </a>
-                    {% else %}
-                    <span class="badge bg-secondary">{{ tag_name }}</span>
-                    {% endif %}
+    
+            <!-- Comments Section -->
+            <div class="col-md-4">
+                <!-- Comment List -->
+                <div class="comments-section mt-4">
+                    <h4>Comments</h4>
+                    {% for comment in comments %}
+                    <div class="comment bg-light p-3 mb-2 rounded">
+                        <strong>{{ comment.user.username }}</strong>
+                        <p>{{ comment.text }}</p>
+                        <small>{{ comment.created_at }}</small>
+    
+                        <div class="d-flex align-items-center mt-2">
+                            <!-- Solved Status -->
+                            {% if comment.is_solved %}
+                                <span class="badge bg-success me-2">Solved</span>
+                            {% endif %}
+                    
+                            <!-- Mark as Solved Button -->
+                            {% if request.user == post.user %}
+                                <button class="btn btn-outline-success btn-sm mark-as-solved-btn" data-comment-id="{{ comment.id }}">
+                                    {% if comment.is_solved %}
+                                        Mark as Unsolved
+                                    {% else %}
+                                        Mark as Solved
+                                    {% endif %}
+                                </button>
+                            {% endif %}
+                        </div>
+    
+                        <!-- Unique Upvote/Downvote Buttons for Each Comment -->
+                        <div class="d-flex mb-4">
+                            <button id="upvote-btn-{{ comment.id }}" class="btn btn-outline-primary">
+                                Upvote <span id="upvote-count-{{ comment.id }}">{{ comment.upvotes }}</span>
+                            </button>
+                            <button id="downvote-btn-{{ comment.id }}" class="btn btn-outline-danger">
+                                Downvote <span id="downvote-count-{{ comment.id }}">{{ comment.downvotes }}</span>
+                            </button>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>No comments yet. Be the first to comment!</p>
                     {% endfor %}
                 </div>
-            </div>
-            {% endif %}
-
-
-            <!-- UpVote/DownVote Buttons -->
-            <div class="d-flex mb-4">
-                <button id="upvote-btn" class="btn btn-outline-primary">
-                    Upvote <span id="upvote-count">{{ post.upvotes }}</span>
-                </button>
-                <button id="downvote-btn" class="btn btn-outline-danger">
-                    Downvote <span id="downvote-count">{{ post.downvotes }}</span>
-                </button>
-            </div>
-
-            <!-- Add Comment -->
-            <div class="add-comment mt-4">
-                <h5>Add a Comment</h5>
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="comment-text" class="form-label">Text:</label>
-                        <textarea id="comment-text" name="text" class="form-control" rows="4"
-                            placeholder="Enter your comment..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 mt-3">Submit</button>
-                </form>
-            </div>
-
-        </div>
-
-        <!-- Comments Section -->
-        <div class="col-md-4">
-            <!-- Comment List -->
-            <div class="comments-section mt-4">
-                <h4>Comments</h4>
-                {% for comment in comments %}
-                <div class="comment bg-light p-3 mb-2 rounded">
-                    <strong>{{ comment.user.username }}</strong>
-                    <p>{{ comment.text }}</p>
-                    <small>{{ comment.created_at }}</small>
-
-                    <div class="d-flex align-items-center mt-2">
-                        <!-- Solved Status -->
-                        {% if comment.is_solved %}
-                            <span class="badge bg-success me-2">Solved</span>
-                        {% endif %}
-                
-                        <!-- Mark as Solved Button -->
-                        {% if request.user == post.user %}
-                            <button class="btn btn-outline-success btn-sm mark-as-solved-btn" data-comment-id="{{ comment.id }}">
-                                {% if comment.is_solved %}
-                                    Mark as Unsolved
-                                {% else %}
-                                    Mark as Solved
-                                {% endif %}
-                            </button>
-                        {% endif %}
-                    </div>
-
-                    <!-- Unique Upvote/Downvote Buttons for Each Comment -->
-                    <div class="d-flex mb-4">
-                        <button id="upvote-btn-{{ comment.id }}" class="btn btn-outline-primary">
-                            Upvote <span id="upvote-count-{{ comment.id }}">{{ comment.upvotes }}</span>
-                        </button>
-                        <button id="downvote-btn-{{ comment.id }}" class="btn btn-outline-danger">
-                            Downvote <span id="downvote-count-{{ comment.id }}">{{ comment.downvotes }}</span>
-                        </button>
-                    </div>
-                </div>
-                {% empty %}
-                <p>No comments yet. Be the first to comment!</p>
-                {% endfor %}
             </div>
         </div>
     </div>

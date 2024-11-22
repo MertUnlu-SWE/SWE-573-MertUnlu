@@ -146,18 +146,49 @@ def vote_comment(request, comment_id, vote_type):
     
     return JsonResponse({'upvotes': comment.upvotes, 'downvotes': comment.downvotes})
 
-def mark_comment_as_solved(request, comment_id):
-    comment = get_object_or_404(Comment, id=comment_id)
+@login_required
+def mark_post_as_solved(request, post_id, comment_id):
+    if request.method == 'POST':
+        post = get_object_or_404(Post, id=post_id)
+        comment = get_object_or_404(Comment, id=comment_id, post=post)
 
-    # Check if the user is the creator of the post associated with the comment
-    if request.user != comment.post.user:
-        return JsonResponse({'error': 'You are not authorized to mark this comment as solved.'}, status=403)
+        # Sadece post sahibi işlem yapabilir
+        if request.user != post.user:
+            return JsonResponse({'error': 'You are not authorized to mark this post as solved.'}, status=403)
 
-    # Toggle the solved status of the comment
-    comment.is_solved = not comment.is_solved
-    comment.save()
+        # Post'u çözülmüş olarak işaretleyin ve doğru yorumu kaydedin
+        post.is_solved = True
+        post.solved_comment = comment
+        post.save()
 
-    return JsonResponse({'is_solved': comment.is_solved})
+        # Çözüm işaretlendiğinde yorumu güncelleyin
+        comment.is_solved = True
+        comment.save()
+
+        return JsonResponse({
+            'post_is_solved': post.is_solved,
+            'solved_comment_id': comment.id,
+            'solved_comment_text': comment.text,
+        })
+    return JsonResponse({'error': 'Invalid request method.'}, status=400)
+
+@login_required
+def unmark_post_as_solved(request, post_id):
+    if request.method == 'POST':
+        post = get_object_or_404(Post, id=post_id)
+
+        # Sadece post sahibi işlem yapabilir
+        if request.user != post.user:
+            return JsonResponse({'error': 'You are not authorized to unmark this post as solved.'}, status=403)
+
+        # Çözüm durumunu sıfırlayın
+        post.is_solved = False
+        post.solved_comment = None
+        post.save()
+
+        return JsonResponse({'post_is_solved': post.is_solved})
+    return JsonResponse({'error': 'Invalid request method.'}, status=400)
+
 
 def post_creation(request):
     if request.method == 'POST':

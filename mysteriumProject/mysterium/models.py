@@ -17,6 +17,15 @@ class Post(models.Model):
     voted_users = models.ManyToManyField(User, related_name="voted_posts", blank=True)
     tags = models.CharField(max_length=500, blank=True, help_text="Comma-separated tags.")
     created_at = models.DateTimeField(auto_now_add=True)  # Created Date
+    is_solved = models.BooleanField(default=False)  # Post Solved
+    solved_comment = models.ForeignKey(
+        'Comment',  # Comment section reference
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='solved_posts',
+        help_text="The comment that solves this post."
+    )
 
     def __str__(self):
         return self.title
@@ -29,4 +38,3 @@ class Comment(models.Model):
     downvotes = models.IntegerField(default=0)
     voted_users = models.ManyToManyField(User, related_name="voted_comments", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    is_solved = models.BooleanField(default=False)
