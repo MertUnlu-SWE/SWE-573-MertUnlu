@@ -148,7 +148,7 @@ def vote_comment(request, comment_id, vote_type):
     return JsonResponse({'upvotes': comment.upvotes, 'downvotes': comment.downvotes})
 
 @login_required
-def mark_post_as_solved(request, post_id, comment_id):
+def mark_as_solved(request, post_id, comment_id):
     if request.method == 'POST':
         post = get_object_or_404(Post, id=post_id)
         comment = get_object_or_404(Comment, id=comment_id, post=post)
@@ -174,9 +174,9 @@ def mark_post_as_solved(request, post_id, comment_id):
         })
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
-
+@csrf_exempt
 @login_required
-def unmark_post_as_solved(request, post_id):
+def unmark_as_solved(request, post_id):
     print("Unmark Called")  # Debug log
     print(f"Request Method: {request.method}, Post ID: {post_id}")
     if request.method == 'POST':
@@ -195,6 +195,7 @@ def unmark_post_as_solved(request, post_id):
         return JsonResponse({'post_is_solved': post.is_solved})
     print("Invalid Request Method")
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
+
 
 
 def post_creation(request):
@@ -236,21 +237,31 @@ def post_creation(request):
 
 def fetch_wikidata(request):
     try:
-        tags = request.GET.get('tags', '').strip("[]").split(",")
-        tags = [tag.strip().strip('"') for tag in tags]
+        tags_param = request.GET.get('tags', '').strip()
+        if not tags_param:
+            return JsonResponse({'error': 'No tags provided.'}, status=400)
+        
+        tags = [tags_param.strip()] if ',' not in tags_param else [
+            tag.strip() for tag in tags_param.strip("[]").split(',') if tag.strip()
+        ]
+        
         all_results = {}
-
         for tag in tags:
             try:
                 results = fetch_wikidata_tags(tag)
                 if results:
-                    all_results[tag] = results
+                    all_results[tag] = [{'qNumber': res[0].split('/')[-1], 'label': res[1]} for res in results]
+                else:
+                    all_results[tag] = []
             except Exception as e:
                 all_results[tag] = f"Error fetching data for tag '{tag}': {str(e)}"
-
+        
         return JsonResponse({'results': all_results})
     except Exception as e:
         return JsonResponse({'error': f"Failed to fetch Wikidata information: {str(e)}"}, status=500)
+
+
+
 
 
 
