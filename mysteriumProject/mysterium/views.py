@@ -34,6 +34,16 @@ def register(request):
     return render(request, 'login.html')
 
 def login_view(request):
+    # Kullanıcının geldiği URL'yi sakla (login sayfasından önceki sayfa)
+    if 'next' not in request.GET and 'HTTP_REFERER' in request.META:
+        previous_url = request.META.get('HTTP_REFERER', '/')
+        # Eğer önceki URL login sayfası değilse, session'a kaydet
+        if not previous_url.endswith('/login/'):
+            request.session['previous_url'] = previous_url
+
+    # next parametresi veya session'dan gelen önceki URL'yi al
+    next_url = request.GET.get('next', request.session.get('previous_url', '/'))
+
     if request.method == 'POST':
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
@@ -47,7 +57,9 @@ def login_view(request):
             user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('index')
+                messages.success(request, 'Successfully logged in.')
+                next_url = request.session.pop('previous_url', '/')
+                return redirect(next_url)
             else:
                 return render(request, 'login.html', {'error': 'Invalid email or password.'})
         except Exception as e:
@@ -56,7 +68,7 @@ def login_view(request):
             return render(request, 'login.html', {'error': 'An unexpected error occurred. Please try again later.'})
     
     # GET request (load the login page)
-    return render(request, 'login.html')
+    return render(request, 'login.html', {'next': next_url})
 
 
 @login_required
@@ -65,6 +77,7 @@ def profile_view(request):
 
 def logout_view(request):
     logout(request)
+    messages.success(request, 'Successfully logged out.')
     return redirect('index')
 
 def index(request):
@@ -78,6 +91,10 @@ def index(request):
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     comments = Comment.objects.filter(post=post).order_by('-created_at')
+
+    # Login Check
+    if request.method == 'POST' and not request.user.is_authenticated:
+        return JsonResponse({'error': 'You must login to add a comment!'}, status=403)
 
     tags = []
     if post.tags:
@@ -110,6 +127,10 @@ def post_detail(request, post_id):
     })
 
 def vote_post(request, post_id, vote_type):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'You must login before upvoting or downvoting!'}, status=403)
+
+    
     post = Post.objects.get(id=post_id)
     
     # Check if the user has already voted
@@ -129,6 +150,9 @@ def vote_post(request, post_id, vote_type):
     return JsonResponse({'upvotes': post.upvotes, 'downvotes': post.downvotes})
 
 def vote_comment(request, comment_id, vote_type):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'You must login before commenting!'}, status=403)
+
     comment = Comment.objects.get(id=comment_id)
     
     # Check if the user has already voted

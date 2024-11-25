@@ -87,6 +87,7 @@
                     <h5>Add a Comment</h5>
                     <form method="post">
                         {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
                         <div class="mb-3">
                             <label for="comment-text" class="form-label">Text:</label>
                             <textarea id="comment-text" name="text" class="form-control" rows="4"
@@ -151,6 +152,13 @@
 <script>
     $(document).ready(function() {
         console.log("Document is ready");
+
+        $('form').submit(function (e) {
+            if (!{{ user.is_authenticated|yesno:"true,false" }}) {
+                e.preventDefault(); // Prevent form submition
+                alert('You must login to add a comment!');
+            }
+        });
     
         // Handle post upvote/downvote
         $('#upvote-btn').click(function() {
@@ -160,6 +168,13 @@
                 headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                 success: function(data) {
                     $('#upvote-count').text(data.upvotes);
+                },
+                error: function(xhr) {
+                    if (xhr.status === 403) {
+                        alert('You must login to perform this action!');
+                    } else {
+                        alert('An error occurred. Please try again.');
+                    }
                 }
             });
         });
@@ -171,6 +186,13 @@
                 headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                 success: function(data) {
                     $('#downvote-count').text(data.downvotes);
+                },
+                error: function(xhr) {
+                    if (xhr.status === 403) {
+                        alert('You must login to perform this action!');
+                    } else {
+                        alert('An error occurred. Please try again.');
+                    }
                 }
             });
         });
@@ -184,6 +206,13 @@
                 headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                 success: function(data) {
                     $('#upvote-count-{{ comment.id }}').text(data.upvotes);
+                },
+                error: function(xhr) {
+                    if (xhr.status === 403) {
+                        alert('You must login to perform this action!');
+                    } else {
+                        alert('An error occurred. Please try again.');
+                    }
                 }
             });
         });
@@ -195,6 +224,13 @@
                 headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                 success: function(data) {
                     $('#downvote-count-{{ comment.id }}').text(data.downvotes);
+                },
+                error: function(xhr) {
+                    if (xhr.status === 403) {
+                        alert('You must login to perform this action!');
+                    } else {
+                        alert('An error occurred. Please try again.');
+                    }
                 }
             });
         });
