@@ -47,7 +47,7 @@ def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
-        
+
         # Check if both fields are provided
         if not email or not password:
             return render(request, 'login.html', {'error': 'Email and password are required.'})
@@ -56,7 +56,7 @@ def login_view(request):
             # Authenticate the user
             user = authenticate(request, username=email, password=password)
             if user is not None:
-                login(request, user)
+                login(request, user, backend='mysterium.backends.EmailBackend')
                 messages.success(request, 'Successfully logged in.')
                 next_url = request.session.pop('previous_url', '/')
                 return redirect(next_url)
@@ -198,7 +198,7 @@ def mark_as_solved(request, post_id, comment_id):
         })
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
-@csrf_exempt
+
 @login_required
 def unmark_as_solved(request, post_id):
     print("Unmark Called")  # Debug log
