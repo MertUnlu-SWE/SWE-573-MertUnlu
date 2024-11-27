@@ -8,12 +8,12 @@ from pathlib import Path
 
 class ViewTests(TestCase):
     def setUp(self):
-        self.client = Client()
-        self.user = User.objects.create_user(
-            username='testuser@example.com',
-            email='testuser@example.com',
-            password='testpass'
-        )
+        self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpass')
+        self.other_user = User.objects.create_user(username='otheruser', email='otheruser@example.com', password='otherpass')
+        self.post = Post.objects.create(title='Test Post', description='Test Description', user=self.user)
+        self.comment = Comment.objects.create(post=self.post, text='Test Comment', user=self.user)
+
+        print(f"DEBUG: Created Post ID: {self.post.id}, Comment ID: {self.comment.id}")  # Debugging
 
 
     def test_register_view(self):
@@ -98,31 +98,29 @@ class ViewTests(TestCase):
     def test_vote_post(self):
         post = Post.objects.create(title='Test Post', description='Test Description', user=self.user)
 
-        # Login and vote
-        self.client.login(username='testuser@example.com', password='testpass')
-        response = self.client.post(f'/vote_post/{post.id}/upvote/')
-        self.assertEqual(response.status_code, 200)  # Success
+        self.client.login(username='testuser', password='testpass')
+        response = self.client.post(f'/post/{self.post.id}/upvote/')
+        print(f"DEBUG: Response for upvote: {response.status_code}")  # Debugging
+        self.assertEqual(response.status_code, 200)
 
-        # Check vote count
-        post.refresh_from_db()
-        self.assertEqual(post.upvotes, 1)
+        self.post.refresh_from_db()
+        print(f"DEBUG: Upvotes after vote: {self.post.upvotes}")  # Debugging
+        self.assertEqual(self.post.upvotes, 1)
 
 
 
     def test_mark_as_solved(self):
-        post = Post.objects.create(title='Test Post', description='Test Description', user=self.user)
-        comment = Comment.objects.create(post=post, user=self.user, text='Test Comment')
-
         # Unauthorized access
-        other_user = User.objects.create_user(username='otheruser', email='other@example.com', password='otherpass')
         self.client.login(username='otheruser', password='otherpass')
-        response = self.client.post(f'/mark_as_solved/{post.id}/{comment.id}/')
-        self.assertEqual(response.status_code, 403)  # Forbidden
+        response = self.client.post(f'/post/{self.post.id}/mark_as_solved/comment/{self.comment.id}/')
+        print(f"DEBUG: Response for unauthorized access: {response.status_code}")  # Debugging
+        self.assertEqual(response.status_code, 403)
 
         # Authorized access
-        self.client.login(username='testuser@example.com', password='testpass')
-        response = self.client.post(f'/mark_as_solved/{post.id}/{comment.id}/')
-        self.assertEqual(response.status_code, 200)  # Success
+        self.client.login(username='testuser', password='testpass')
+        response = self.client.post(f'/post/{self.post.id}/mark_as_solved/comment/{self.comment.id}/')
+        print(f"DEBUG: Response for authorized access: {response.status_code}")  # Debugging
+        self.assertEqual(response.status_code, 200)
 
 
 

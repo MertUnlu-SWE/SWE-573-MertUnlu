@@ -132,7 +132,8 @@ def vote_post(request, post_id, vote_type):
 
     
     post = Post.objects.get(id=post_id)
-    
+    print(f"DEBUG: Post ID: {post_id}, Vote Type: {vote_type}")  # Debugging
+
     # Check if the user has already voted
     if request.user in post.voted_users.all():
         return JsonResponse({'error': 'You have already voted on this post.'}, status=403)
@@ -143,11 +144,12 @@ def vote_post(request, post_id, vote_type):
     elif vote_type == 'downvote':
         post.downvotes += 1
     post.save()
-    
+    print(f"DEBUG: Vote counts - Upvotes: {post.upvotes}, Downvotes: {post.downvotes}")  # Debugging
+
     # Add the user to the voted_users field to track that they have voted
     post.voted_users.add(request.user)
     
-    return JsonResponse({'upvotes': post.upvotes, 'downvotes': post.downvotes})
+    return JsonResponse({'success': True, 'upvotes': post.upvotes, 'downvotes': post.downvotes})
 
 def vote_comment(request, comment_id, vote_type):
     if not request.user.is_authenticated:
@@ -177,6 +179,7 @@ def mark_as_solved(request, post_id, comment_id):
         post = get_object_or_404(Post, id=post_id)
         comment = get_object_or_404(Comment, id=comment_id, post=post)
 
+        print(f"DEBUG: User: {request.user}, Post Owner: {post.user}")  # Debugging
         # Sadece post sahibi işlem yapabilir
         if request.user != post.user:
             print(f"Unauthorized Attempt by User: {request.user.username}")
@@ -186,6 +189,7 @@ def mark_as_solved(request, post_id, comment_id):
         post.is_solved = True
         post.solved_comment = comment
         post.save()
+        print("DEBUG: Post marked as solved successfully")  # Debugging
 
         # Çözüm işaretlendiğinde yorumu güncelleyin
         comment.is_solved = True
@@ -195,6 +199,7 @@ def mark_as_solved(request, post_id, comment_id):
             'post_is_solved': post.is_solved,
             'solved_comment_id': comment.id,
             'solved_comment_text': comment.text,
+            'success': True,
         })
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
