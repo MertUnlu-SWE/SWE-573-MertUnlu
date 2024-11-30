@@ -10,13 +10,26 @@ class Post(models.Model):
     user_image = models.ImageField(upload_to='user_images/', blank=True, null=True)  # User Avatar Image
     object_image = models.ImageField(upload_to='object_images/', blank=True, null=True)  # Object Image
     description = models.TextField()  # Description
-    material = models.CharField(max_length=100, blank=True, null=True)  # Material
-    dimensions = models.CharField(max_length=100, blank=True, null=True)  # Dimensions
-    weight = models.CharField(max_length=50, blank=True, null=True)  # Weight
-    condition = models.CharField(max_length=100, blank=True, null=True)  # Condition
-    markings = models.TextField(blank=True, null=True)  # Markings or Text
-    historical_context = models.TextField(blank=True, null=True)  # Historical Context
-    distinctive_features = models.TextField(blank=True, null=True)  # Distinctive Features
+    material = models.CharField(max_length=100, blank=True, null=True)
+    weight = models.CharField(max_length=50, blank=True, null=True)
+    condition = models.CharField(max_length=100, blank=True, null=True)
+    markings = models.TextField(blank=True, null=True)
+    historical_context = models.TextField(blank=True, null=True)
+    distinctive_features = models.TextField(blank=True, null=True)
+    volume = models.CharField(max_length=50, blank=True, null=True)
+    width = models.CharField(max_length=50, blank=True, null=True)
+    height = models.CharField(max_length=50, blank=True, null=True)
+    length = models.CharField(max_length=50, blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    shape = models.CharField(max_length=100, blank=True, null=True)
+    physical_state = models.CharField(max_length=100, blank=True, null=True)
+    color = models.CharField(max_length=50, blank=True, null=True)
+    sound = models.CharField(max_length=100, blank=True, null=True)
+    can_be_disassembled = models.BooleanField(default=False)
+    taste = models.CharField(max_length=100, blank=True, null=True)
+    smell = models.CharField(max_length=100, blank=True, null=True)
+    functionality = models.TextField(blank=True, null=True)
+    location = models.TextField(blank=True, null=True)
     tags = models.CharField(max_length=500, blank=True, help_text="Comma-separated tags.")
     upvotes = models.IntegerField(default=0)
     downvotes = models.IntegerField(default=0)

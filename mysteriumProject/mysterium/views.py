@@ -242,6 +242,20 @@ def post_creation(request):
             post.markings = form.cleaned_data.get('markings')
             post.historical_context = form.cleaned_data.get('historical_context')
             post.distinctive_features = form.cleaned_data.get('distinctive_features')
+            post.volume = form.cleaned_data.get('volume')
+            post.width = form.cleaned_data.get('width')
+            post.height = form.cleaned_data.get('height')
+            post.length = form.cleaned_data.get('length')
+            post.price = form.cleaned_data.get('price')
+            post.shape = form.cleaned_data.get('shape')
+            post.physical_state = form.cleaned_data.get('physical_state')
+            post.color = form.cleaned_data.get('color')
+            post.sound = form.cleaned_data.get('sound')
+            post.can_be_disassembled = form.cleaned_data.get('can_be_disassembled')
+            post.taste = form.cleaned_data.get('taste')
+            post.smell = form.cleaned_data.get('smell')
+            post.functionality = form.cleaned_data.get('functionality')
+            post.location = form.cleaned_data.get('location')
 
             # Handle tags and Wikidata integration
             tags = form.cleaned_data['tags']
@@ -292,8 +306,7 @@ def fetch_wikidata(request):
 
 
 
-
-
+@login_required
 def edit_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
@@ -306,20 +319,37 @@ def edit_post(request, post_id):
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
             updated_post = form.save(commit=False)
-            
-            # Explicitly update new fields (optional, for clarity)
-            updated_post.material = form.cleaned_data.get('material')
-            updated_post.dimensions = form.cleaned_data.get('dimensions')
-            updated_post.weight = form.cleaned_data.get('weight')
-            updated_post.condition = form.cleaned_data.get('condition')
-            updated_post.markings = form.cleaned_data.get('markings')
-            updated_post.historical_context = form.cleaned_data.get('historical_context')
-            updated_post.distinctive_features = form.cleaned_data.get('distinctive_features')
+
+            # Explicitly update the new fields
+            updated_post.material = form.cleaned_data.get('material', post.material)
+            updated_post.weight = form.cleaned_data.get('weight', post.weight)
+            updated_post.condition = form.cleaned_data.get('condition', post.condition)
+            updated_post.markings = form.cleaned_data.get('markings', post.markings)
+            updated_post.historical_context = form.cleaned_data.get('historical_context', post.historical_context)
+            updated_post.distinctive_features = form.cleaned_data.get('distinctive_features', post.distinctive_features)
+            updated_post.volume = form.cleaned_data.get('volume', post.volume)
+            updated_post.width = form.cleaned_data.get('width', post.width)
+            updated_post.height = form.cleaned_data.get('height', post.height)
+            updated_post.length = form.cleaned_data.get('length', post.length)
+            updated_post.price = form.cleaned_data.get('price', post.price)
+            updated_post.shape = form.cleaned_data.get('shape', post.shape)
+            updated_post.physical_state = form.cleaned_data.get('physical_state', post.physical_state)
+            updated_post.color = form.cleaned_data.get('color', post.color)
+            updated_post.sound = form.cleaned_data.get('sound', post.sound)
+            updated_post.can_be_disassembled = form.cleaned_data.get('can_be_disassembled', post.can_be_disassembled)
+            updated_post.taste = form.cleaned_data.get('taste', post.taste)
+            updated_post.smell = form.cleaned_data.get('smell', post.smell)
+            updated_post.functionality = form.cleaned_data.get('functionality', post.functionality)
+            updated_post.location = form.cleaned_data.get('location', post.location)
 
             updated_post.save()
             messages.success(request, "Post updated successfully!")
             return redirect('post_detail', post_id=post.id)
+        else:
+            # Debug için yalnızca POST isteğinde hata çıktısını yazdır
+            print("DEBUG: Form errors:", form.errors)
     else:
+        # GET isteği için formu mevcut post verisiyle başlat
         form = PostForm(instance=post)
 
     return render(request, 'editPost.html', {'form': form, 'post': post})

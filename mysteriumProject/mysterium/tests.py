@@ -1,8 +1,11 @@
-from django.test import TestCase, Client
+from django.test import TestCase
+from .backends import EmailBackend
 from django.contrib.auth.models import User
-from .wikidata_utils import fetch_wikidata_info
+from .wikidata_utils import fetch_wikidata_info, fetch_wikidata_tags
+from unittest.mock import patch
 from django.core.files.uploadedfile import SimpleUploadedFile
 from .models import Post, Comment
+from .forms import PostForm, CommentForm
 from pathlib import Path
 
 
@@ -83,7 +86,33 @@ class ViewTests(TestCase):
         self.assertContains(response, 'Test Post')  # Check content
 
 
-        
+    def test_edit_post(self):
+        self.client.login(username='testuser', password='testpass')
+        response = self.client.get(f'/post/{self.post.id}/edit/')
+        self.assertEqual(response.status_code, 200)  # Ensure successful access
+        self.assertContains(response, self.post.title)  # Ensure the post title is displayed
+
+        # Submit valid edit form
+        response = self.client.post(f'/post/{self.post.id}/edit/', {
+            'title': 'Updated Title',
+            'description': 'Updated Description',
+            'tags': 'Updated, Tags'
+        })
+        self.assertEqual(response.status_code, 302)  # Redirect after successful edit
+        self.post.refresh_from_db()
+        self.assertEqual(self.post.title, 'Updated Title')
+        self.assertEqual(self.post.description, 'Updated Description')
+
+        # Unauthorized edit attempt
+        self.client.logout()
+        response = self.client.post(f'/post/{self.post.id}/edit/', {
+            'title': 'Another Update'
+        })
+        self.assertEqual(response.status_code, 302)  # Redirect to login page
+        self.post.refresh_from_db()
+        self.assertNotEqual(self.post.title, 'Another Update')
+
+
 
     def test_fetch_wikidata(self):
         response = self.client.get('/fetch_wikidata/', {'tags': 'Python'})
@@ -122,7 +151,39 @@ class ViewTests(TestCase):
         print(f"DEBUG: Response for authorized access: {response.status_code}")  # Debugging
         self.assertEqual(response.status_code, 200)
 
+    def test_unmark_as_solved(self):
+        # Mark post as solved first
+        self.post.is_solved = True
+        self.post.save()
 
+        # Unauthorized unmark attempt
+        self.client.login(username='otheruser', password='otherpass')
+        response = self.client.post(f'/post/{self.post.id}/unmark_as_solved/')
+        self.assertEqual(response.status_code, 403)  # Forbidden access
+        self.post.refresh_from_db()
+        self.assertTrue(self.post.is_solved)  # Ensure post is still solved
+
+        # Authorized unmark attempt
+        self.client.login(username='testuser', password='testpass')
+        response = self.client.post(f'/post/{self.post.id}/unmark_as_solved/')
+        self.assertEqual(response.status_code, 200)  # Success
+        self.post.refresh_from_db()
+        self.assertFalse(self.post.is_solved)  # Ensure post is no longer solved
+
+
+    def test_search_tags(self):
+        # Valid query
+        response = self.client.get('/search/', {'query': 'Python'})
+        self.assertEqual(response.status_code, 200)  # Ensure successful response
+        self.assertIn('results', response.json())  # Ensure results returned
+
+        # Invalid or empty query
+        response = self.client.get('/search/', {'query': ''})
+        self.assertEqual(response.status_code, 200)  # Successful response but no results
+        self.assertIn('results', response.json())
+        self.assertEqual(len(response.json()['results']), 0)  # Ensure empty results
+
+    
 
     def test_profile_view(self):
         self.client.login(username='testuser@example.com', password='testpass')
@@ -143,8 +204,91 @@ class ViewTests(TestCase):
 
 
 
-class WikidataUtilsTest(TestCase):
-    def test_fetch_wikidata_info(self):
+class EmailBackendTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpass')
+
+    def test_authenticate_success(self):
+        backend = EmailBackend()
+        user = backend.authenticate(None, username='testuser@example.com', password='testpass')
+        self.assertEqual(user, self.user)
+
+    def test_authenticate_failure(self):
+        backend = EmailBackend()
+        user = backend.authenticate(None, username='wrong@example.com', password='wrongpass')
+        self.assertIsNone(user)
+
+    def test_get_user(self):
+        backend = EmailBackend()
+        user = backend.get_user(self.user.id)
+        self.assertEqual(user, self.user)
+
+
+class PostFormTests(TestCase):
+    def test_post_form_valid(self):
+        form_data = {
+            'title': 'Test Post',
+            'description': 'This is a test description',
+            'tags': 'tag1, tag2'
+        }
+        form = PostForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_post_form_invalid(self):
+        form_data = {}  # Missing required fields
+        form = PostForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+
+class CommentFormTests(TestCase):
+    def test_comment_form_valid(self):
+        form_data = {'text': 'This is a test comment'}
+        form = CommentForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_comment_form_invalid(self):
+        form_data = {}  # Missing required fields
+        form = CommentForm(data=form_data)
+        self.assertFalse(form.is_valid())
+
+
+class PostModelTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='testpass')
+
+    def test_post_creation(self):
+        post = Post.objects.create(title='Test Post', description='Test Description', user=self.user)
+        self.assertEqual(post.title, 'Test Post')
+        self.assertEqual(post.upvotes, 0)
+
+
+class CommentModelTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='testpass')
+        self.post = Post.objects.create(title='Test Post', description='Test Description', user=self.user)
+
+    def test_comment_creation(self):
+        comment = Comment.objects.create(post=self.post, user=self.user, text='Test Comment')
+        self.assertEqual(comment.text, 'Test Comment')
+        self.assertEqual(comment.upvotes, 0)
+
+
+class WikidataUtilsTests(TestCase):
+    @patch('mysterium.wikidata_utils.SPARQLWrapper.query')
+    def test_fetch_wikidata_info_success(self, mock_query):
+        # Mock the SPARQL query response
+        mock_query.return_value.convert.return_value = {
+            'results': {'bindings': [{'item': {'value': 'https://wikidata.org/wiki/Q123'}}]}
+        }
         q_number, label = fetch_wikidata_info('Python')
-        self.assertIsNotNone(q_number)
+        self.assertEqual(q_number, 'Q123')
         self.assertEqual(label, 'Python')
+
+    @patch('mysterium.wikidata_utils.requests.get')
+    def test_fetch_wikidata_tags_success(self, mock_get):
+        # Mock the requests.get response
+        mock_get.return_value.json.return_value = {
+            'search': [{'id': 'Q123', 'label': 'Python'}]
+        }
+        results = fetch_wikidata_tags('Python')
+        self.assertEqual(results[0][1], 'Python')

@@ -19,42 +19,89 @@ class CommentForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
-    material = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'e.g., Metal, Plastic'})
+    volume = forms.CharField(
+    required=False, 
+    widget=forms.TextInput(attrs={'id': 'volume', 'placeholder': 'e.g., 500ml'})
     )
-    dimensions = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'e.g., 10cm x 5cm x 2cm'})
+
+    width = forms.CharField(
+        required=False, 
+        widget=forms.TextInput(attrs={'id': 'width', 'placeholder': 'e.g., 10cm'})
     )
-    weight = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'e.g., 500g'})
+
+    height = forms.CharField(
+        required=False, 
+        widget=forms.TextInput(attrs={'id': 'height', 'placeholder': 'e.g., 15cm'})
     )
-    condition = forms.CharField(
-        required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'e.g., New, Worn, Damaged'})
+
+    length = forms.CharField(
+        required=False, 
+        widget=forms.TextInput(attrs={'id': 'length', 'placeholder': 'e.g., 20cm'})
     )
-    markings = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={
-            'rows': 3,
-            'placeholder': 'e.g., Symbols, Numbers, Inscriptions'
-        })
+
+    price = forms.DecimalField(
+        required=False, 
+        max_digits=10, 
+        decimal_places=2, 
+        widget=forms.TextInput(attrs={'id': 'price', 'placeholder': 'e.g., 150.00'}),
+        error_messages={
+            'invalid': "Please enter a valid price in the format '123.45'."
+        }
     )
-    historical_context = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={
-            'rows': 3,
-            'placeholder': 'e.g., Likely from the 18th century'
-        })
+
+    shape = forms.CharField(
+        required=False, 
+        widget=forms.TextInput(attrs={'id': 'shape', 'placeholder': 'e.g., Cylindrical'})
     )
+
+    physical_state = forms.CharField(
+        required=False, 
+        widget=forms.TextInput(attrs={'id': 'physical_state', 'placeholder': 'e.g., Solid'})
+    )
+
+    color = forms.CharField(
+        required=False, 
+        widget=forms.TextInput(attrs={'id': 'color', 'placeholder': 'e.g., Red'})
+    )
+
+    sound = forms.CharField(
+        required=False, 
+        widget=forms.TextInput(attrs={'id': 'sound', 'placeholder': 'e.g., Silent'})
+    )
+
+    can_be_disassembled = forms.BooleanField(
+        required=False, 
+        widget=forms.CheckboxInput(attrs={'id': 'can_be_disassembled'})
+    )
+
+    taste = forms.CharField(
+        required=False, 
+        widget=forms.TextInput(attrs={'id': 'taste', 'placeholder': 'e.g., Bitter'})
+    )
+
+    smell = forms.CharField(
+        required=False, 
+        widget=forms.TextInput(attrs={'id': 'smell', 'placeholder': 'e.g., Floral'})
+    )
+
+    functionality = forms.CharField(
+        required=False, 
+        widget=forms.Textarea(attrs={'id': 'functionality', 'placeholder': 'e.g., Used for cutting wood'})
+    )
+
+    location = forms.CharField(
+        required=False, 
+        widget=forms.Textarea(attrs={'id': 'location', 'placeholder': 'e.g., Found in a forest in Norway'})
+    )
+
     distinctive_features = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={
-            'rows': 3,
-            'placeholder': 'e.g., Unique patterns, unusual texture'
-        })
+        required=False, 
+        widget=forms.Textarea(attrs={'id': 'distinctive_features', 'placeholder': 'e.g., Unique patterns, unusual texture'})
+    )
+
+    historical_context = forms.CharField(
+        required=False, 
+        widget=forms.Textarea(attrs={'id': 'historical_context', 'placeholder': 'e.g., Timezone, 1500 BC'})
     )
 
     tags = forms.CharField(
@@ -67,8 +114,12 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = [
-            'title', 'description', 'object_image', 'material', 'dimensions',
-            'weight', 'condition', 'markings', 'historical_context', 'distinctive_features', 'tags'
+            'title', 'description', 'object_image', 'material',
+            'weight', 'condition', 'markings', 'historical_context',
+            'distinctive_features', 'volume', 'width', 'height', 'length',
+            'price', 'shape', 'physical_state', 'color', 'sound',
+            'can_be_disassembled', 'taste', 'smell', 'functionality',
+            'location', 'tags'
         ]
 
     def clean_tags(self):

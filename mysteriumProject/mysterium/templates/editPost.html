@@ -7,7 +7,7 @@
     <div class="share-container p-5 rounded-3 shadow-lg">
         <h2 class="text-center mb-4">Edit Your Mystery</h2>
 
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data" action="{% url 'edit_post' post.id %}">
             {% csrf_token %}
 
             <!-- Title Field -->
@@ -23,40 +23,126 @@
             </div>
 
             <!-- Descriptive Fields -->
+            <!-- Volume -->
+            <div class="mb-3">
+                <label for="volume" class="form-label">Volume</label>
+                <input type="text" id="volume" name="volume" class="form-control" value="{{ post.volume }}" placeholder="e.g., 500ml">
+            </div>            
+
+            <!-- Width -->
+            <div class="mb-3">
+                <label for="width" class="form-label">Width</label>
+                <input type="text" id="width" name="width" class="form-control" value="{{ post.width }}" placeholder="e.g., 10cm">
+            </div>
+
+            <!-- Height -->
+            <div class="mb-3">
+                <label for="height" class="form-label">Height</label>
+                <input type="text" id="height" name="height" class="form-control" value="{{ post.height }}" placeholder="e.g., 15cm">
+            </div>
+
+            <!-- Length -->
+            <div class="mb-3">
+                <label for="length" class="form-label">Length</label>
+                <input type="text" id="length" name="length" class="form-control" value="{{ post.length }}" placeholder="e.g., 20cm">
+            </div>
+
+            <!-- Material -->
             <div class="mb-3">
                 <label for="material" class="form-label">Material</label>
-                <input type="text" name="material" class="form-control" placeholder="e.g., Metal, Plastic">
+                <input type="text" id="material" name="material" class="form-control" value="{{ post.material }}" placeholder="e.g., Metal, Plastic">
             </div>
 
-            <div class="mb-3">
-                <label for="dimensions" class="form-label">Dimensions</label>
-                <input type="text" name="dimensions" class="form-control" placeholder="e.g., 10cm x 5cm x 2cm">
-            </div>
-
+            <!-- Weight -->
             <div class="mb-3">
                 <label for="weight" class="form-label">Weight</label>
-                <input type="text" name="weight" class="form-control" placeholder="e.g., 500g">
+                <input type="text" id="weight" name="weight" class="form-control" value="{{ post.weight }}" placeholder="e.g., 500g">
             </div>
 
+            <!-- Condition -->
             <div class="mb-3">
                 <label for="condition" class="form-label">Condition</label>
-                <input type="text" name="condition" class="form-control" placeholder="e.g., New, Worn, Damaged">
+                <input type="text" id="condition" name="condition" class="form-control" value="{{ post.condition }}" placeholder="e.g., New, Worn, Damaged">
             </div>
 
+            <!-- Price -->
+            <div class="mb-3">
+                <label for="price" class="form-label">Price</label>
+                <input type="text" id="price" name="price" class="form-control" value="{{ post.price }}" placeholder="e.g., 150.00">
+            </div>
+
+            <!-- Shape -->
+            <div class="mb-3">
+                <label for="shape" class="form-label">Shape</label>
+                <input type="text" id="shape" name="shape" class="form-control" value="{{ post.shape }}" placeholder="e.g., Cylindrical">
+            </div>
+
+            <!-- Physical State -->
+            <div class="mb-3">
+                <label for="physical_state" class="form-label">Physical State</label>
+                <input type="text" id="physical_state" name="physical_state" class="form-control" value="{{ post.physical_state }}" placeholder="e.g., Solid, Liquid">
+            </div>
+
+            <!-- Color -->
+            <div class="mb-3">
+                <label for="color" class="form-label">Color</label>
+                <input type="text" id="color" name="color" class="form-control" value="{{ post.color }}" placeholder="e.g., Red">
+            </div>
+
+            <!-- Sound -->
+            <div class="mb-3">
+                <label for="sound" class="form-label">Sound</label>
+                <input type="text" id="sound" name="sound" class="form-control" value="{{ post.sound }}" placeholder="e.g., Silent, Loud">
+            </div>
+
+            <!-- Can Be Disassembled/Assembled -->
+            <div class="mb-3">
+                <label for="can_be_disassembled" class="form-label">Can Be Disassembled/Assembled</label>
+                <input type="checkbox" id="can_be_disassembled" name="can_be_disassembled" class="form-check-input" {% if post.can_be_disassembled %}checked{% endif %}>
+            </div>
+
+            <!-- Taste -->
+            <div class="mb-3">
+                <label for="taste" class="form-label">Taste</label>
+                <input type="text" id="taste" name="taste" class="form-control" value="{{ post.taste }}" placeholder="e.g., Bitter">
+            </div>
+
+            <!-- Smell -->
+            <div class="mb-3">
+                <label for="smell" class="form-label">Smell</label>
+                <input type="text" id="smell" name="smell" class="form-control" value="{{ post.smell }}" placeholder="e.g., Floral">
+            </div>
+
+            <!-- Functionality -->
+            <div class="mb-3">
+                <label for="functionality" class="form-label">Functionality</label>
+                <textarea id="functionality" name="functionality" class="form-control" rows="3" placeholder="e.g., Used for cutting wood">{{ post.functionality }}</textarea>
+            </div>
+
+            <!-- Location -->
+            <div class="mb-3">
+                <label for="location" class="form-label">Location</label>
+                <textarea id="location" name="location" class="form-control" rows="3" placeholder="e.g., Found in a forest in Norway">{{ post.location }}</textarea>
+            </div>
+
+            <!-- Markings -->
             <div class="mb-3">
                 <label for="markings" class="form-label">Markings or Text</label>
-                <textarea name="markings" class="form-control" rows="3" placeholder="e.g., Symbols, Numbers, Inscriptions"></textarea>
+                <textarea id="markings" name="markings" class="form-control" rows="3" placeholder="e.g., Symbols, Numbers, Inscriptions">{{ post.markings }}</textarea>
             </div>
 
+            <!-- Historical Context -->
             <div class="mb-3">
                 <label for="historical_context" class="form-label">Historical Context</label>
-                <textarea name="historical_context" class="form-control" rows="3" placeholder="e.g., Likely from the 18th century"></textarea>
+                <textarea id="historical_context" name="historical_context" class="form-control" rows="3" placeholder="e.g., Likely from the 18th century">{{ post.historical_context }}</textarea>
             </div>
 
+            <!-- Distinctive Features -->
             <div class="mb-3">
                 <label for="distinctive_features" class="form-label">Distinctive Features</label>
-                <textarea name="distinctive_features" class="form-control" rows="3" placeholder="e.g., Unique patterns, unusual texture"></textarea>
+                <textarea id="distinctive_features" name="distinctive_features" class="form-control" rows="3" placeholder="e.g., Unique patterns, unusual texture">{{ post.distinctive_features }}</textarea>
             </div>
+
 
             <!-- Image Upload -->
             <div class="image-upload mb-3">
