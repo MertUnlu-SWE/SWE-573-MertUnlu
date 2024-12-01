@@ -9,6 +9,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('index/', views.index, name='index'),
     path('search/basic/', views.basic_search, name='basic_search'),
+    path('search/advanced/', views.advanced_search, name='advanced_search'),
     path('postCreation/', views.post_creation, name='postCreation'),
     path('post/<int:post_id>/', views.post_detail, name='post_detail'),
     path('post/<int:post_id>/edit/', views.edit_post, name='edit_post'),  # Place edit_post before vote_post

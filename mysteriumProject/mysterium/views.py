@@ -384,3 +384,64 @@ def basic_search(request):
         posts = posts.annotate(comment_count=Count('comments')).order_by('-comment_count')  # En fazla yorumu sıralar
 
     return render(request, 'searchResults.html', {'query': query, 'posts': posts, 'sort_by': sort_by})
+
+def advanced_search(request):
+    filters = {}
+
+    # Price Range
+    if request.GET.get("min_price"):
+        filters["price__gte"] = request.GET["min_price"]
+    if request.GET.get("max_price"):
+        filters["price__lte"] = request.GET["max_price"]
+
+     # Tags Filter
+    if request.GET.get("tags"):
+        tags = request.GET["tags"].split(",")
+        q_numbers = []
+        for tag in tags:
+            q_number, _ = fetch_wikidata_info(tag.strip())
+            if q_number:  # Only add if q_number is valid
+                q_numbers.append(q_number)
+        if q_numbers:
+            filters["tags__icontains"] = ",".join(q_numbers)
+
+    # Additional Filters
+    if request.GET.get("color"):
+        filters["color__icontains"] = request.GET["color"]
+    if request.GET.get("material"):
+        filters["material__icontains"] = request.GET["material"]
+    if request.GET.get("volume"):
+        filters["volume__icontains"] = request.GET["volume"]
+    if request.GET.get("width"):
+        filters["width__icontains"] = request.GET["width"]
+    if request.GET.get("height"):
+        filters["height__icontains"] = request.GET["height"]
+    if request.GET.get("length"):
+        filters["length__icontains"] = request.GET["length"]
+    if request.GET.get("weight"):
+        filters["weight__icontains"] = request.GET["weight"]
+    if request.GET.get("condition"):
+        filters["condition__icontains"] = request.GET["condition"]
+    if request.GET.get("shape"):
+        filters["shape__icontains"] = request.GET["shape"]
+    if request.GET.get("physical_state"):
+        filters["physical_state__icontains"] = request.GET["physical_state"]
+    if request.GET.get("sound"):
+        filters["sound__icontains"] = request.GET["sound"]
+    if request.GET.get("taste"):
+        filters["taste__icontains"] = request.GET["taste"]
+    if request.GET.get("smell"):
+        filters["smell__icontains"] = request.GET["smell"]
+    if request.GET.get("location"):
+        filters["location__icontains"] = request.GET["location"]
+    if request.GET.get("markings"):
+        filters["markings__icontains"] = request.GET["markings"]
+    if request.GET.get("historical_context"):
+        filters["historical_context__icontains"] = request.GET["historical_context"]
+    if request.GET.get("distinctive_features"):
+        filters["distinctive_features__icontains"] = request.GET["distinctive_features"]
+
+    # Query the database
+    posts = Post.objects.filter(**filters).distinct().order_by('-created_at')
+    return render(request, 'searchResults.html', {'posts': posts})
+

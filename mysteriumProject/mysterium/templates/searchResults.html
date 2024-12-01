@@ -16,9 +16,46 @@
                     <option value="upvotes" {% if request.GET.sort_by == 'upvotes' %}selected{% endif %}>Most Upvotes</option>
                     <option value="comments" {% if request.GET.sort_by == 'comments' %}selected{% endif %}>Most Comments</option>
                 </select>
-
+                
             <button type="submit" class="search-btn">Search</button>
-        </form>        
+            <button type="button" class="filter-btn" onclick="toggleFilterModal()">Filter</button>
+        </form>
+
+        <!-- Modal Background -->
+        <div id="modal-background" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 998;"></div>
+
+        <!-- Advanced Search Modal -->
+        <div id="filter-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); z-index: 999;">
+            <div class="filter-content">
+                <span class="close" onclick="toggleFilterModal()" style="cursor: pointer; font-size: 1.5rem; font-weight: bold;">&times;</span>
+                <h3>Filter</h3>
+                <form id="advanced-filter-form" action="/search/advanced/" method="get">
+                    <input type="number" name="min_price" placeholder="Min Price">
+                    <input type="number" name="max_price" placeholder="Max Price">
+                    <input type="text" name="color" placeholder="Color">
+                    <input type="text" name="material" placeholder="Material">
+                    <input type="text" name="volume" placeholder="Volume (e.g., 500ml)">
+                    <input type="text" name="width" placeholder="Width (e.g., 10cm)">
+                    <input type="text" name="height" placeholder="Height (e.g., 15cm)">
+                    <input type="text" name="length" placeholder="Length (e.g., 20cm)">
+                    <input type="text" name="weight" placeholder="Weight (e.g., 500g)">
+                    <input type="text" name="condition" placeholder="Condition (e.g., New, Worn)">
+                    <input type="text" name="shape" placeholder="Shape (e.g., Cylindrical)">
+                    <input type="text" name="physical_state" placeholder="Physical State (e.g., Solid, Liquid)">
+                    <input type="text" name="sound" placeholder="Sound (e.g., Silent, Loud)">
+                    <input type="text" name="taste" placeholder="Taste (e.g., Bitter)">
+                    <input type="text" name="smell" placeholder="Smell (e.g., Floral)">
+                    <input type="text" name="functionality" placeholder="Functionality (e.g., Cutting wood)">
+                    <textarea name="location" placeholder="Location (e.g., Found in Norway)"></textarea>
+                    <textarea name="markings" placeholder="Markings (e.g., Symbols, Numbers)"></textarea>
+                    <textarea name="historical_context" placeholder="Historical Context (e.g., 18th century)"></textarea>
+                    <textarea name="distinctive_features" placeholder="Distinctive Features (e.g., Unique patterns)"></textarea>
+                    <button type="submit" class="search-btn">Apply Filters</button>
+                </form>
+                <button class="clear-btn" onclick="document.getElementById('advanced-filter-form').reset()">Clear All</button>
+            </div>
+        </div>
+
         <div class="share-mystery">
             <a href="{% url 'postCreation' %}" class="btn btn-primary">Share Your Mystery</a>
         </div>
@@ -47,4 +84,32 @@
         <p>No results found for "{{ query }}". Try searching with different keywords or check your spelling.</p>
     {% endif %}
 </div>
+<script>
+    function toggleFilterModal() {
+        console.log("Toggle Filter Modal triggered");
+    
+        // Modal ve arka plan elemanlarını alıyoruz
+        const modal = document.getElementById("filter-modal");
+        const background = document.getElementById("modal-background");
+    
+        // Mevcut görünüme göre modal ve arka planın görünürlük durumunu değiştiriyoruz
+        if (modal.style.display === "block") {
+            modal.style.display = "none";
+            background.style.display = "none";
+        } else {
+            modal.style.display = "block";
+            background.style.display = "block";
+        }
+    }
+    
+    // Arka plana tıklanınca modalı kapatma
+    document.getElementById("modal-background").addEventListener("click", () => {
+        document.getElementById("filter-modal").style.display = "none";
+        document.getElementById("modal-background").style.display = "none";
+    });    
+    
+    function clearFilters() {
+        document.getElementById("advanced-filter-form").reset();
+    }
+</script>
 {% endblock %}

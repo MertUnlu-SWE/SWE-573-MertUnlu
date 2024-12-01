@@ -18,6 +18,14 @@ class CommentForm(forms.ModelForm):
         fields = ['text']
 
 
+class AdvancedSearchForm(forms.Form):
+    min_price = forms.DecimalField(required=False, min_value=0, max_digits=10, decimal_places=2)
+    max_price = forms.DecimalField(required=False, min_value=0, max_digits=10, decimal_places=2)
+    color = forms.CharField(required=False, max_length=50)
+    material = forms.CharField(required=False, max_length=100)
+
+
+
 class PostForm(forms.ModelForm):
     volume = forms.CharField(
     required=False, 

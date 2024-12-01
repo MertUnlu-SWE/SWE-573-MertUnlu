@@ -17,6 +17,7 @@ def fetch_wikidata_info(tag):
         results = sparql.query().convert()
         if not results["results"]["bindings"]:
             return None, tag
+        
         item_uri = results["results"]["bindings"][0]["item"]["value"]
         q_number = item_uri.split("/")[-1]
         
