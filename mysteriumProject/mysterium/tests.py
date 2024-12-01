@@ -112,22 +112,6 @@ class ViewTests(TestCase):
         self.assertContains(response, 'tag2')
 
 
-        #with open(Path(__file__).resolve().parent.parent / "media" / "Images" / "skyDisk.jpg", 'rb') as img:
-         #   image = SimpleUploadedFile(
-          #      name='skyDisk.jpg', content=img.read(), content_type='image/jpeg')
-
-        #post = Post.objects.create(
-         #   title='Test Post',
-          #  description='Test Description',
-           # user=self.user,
-            #object_image=image
-        #)
-
-        #response = self.client.get(f'/post/{post.id}/')
-        #self.assertEqual(response.status_code, 200)  # Ensure successful access
-        #self.assertContains(response, 'Test Post')  # Check content
-
-
     def test_edit_post(self):
         self.client.login(username='testuser', password='testpass')
         response = self.client.get(f'/post/{self.post.id}/edit/')
@@ -152,15 +136,6 @@ class ViewTests(TestCase):
         self.assertEqual(self.post.tags.replace(" ", ""), 'newtag1,newtag2')  # Ensure the format includes spaces
         self.assertEqual(self.post.price, Decimal('99.99'))
         self.assertEqual(self.post.color, 'Blue')
-
-        # Unauthorized edit attempt
-        #self.client.logout()
-        #response = self.client.post(f'/post/{self.post.id}/edit/', {
-        #    'title': 'Another Update'
-        #})
-        #self.assertEqual(response.status_code, 302)  # Redirect to login page
-        #self.post.refresh_from_db()
-        #self.assertNotEqual(self.post.title, 'Unauthorized Update')
 
 
     def test_fetch_wikidata(self):

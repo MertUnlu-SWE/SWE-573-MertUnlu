@@ -371,22 +371,31 @@ def basic_search(request):
         title__icontains=query  # Başlık içinde arama
     ) if query else Post.objects.none()
 
-    # Sıralama Mantığı
-    if sort_by == 'date':
-        posts = posts.order_by('-created_at')  # En son eklenene göre sıralar
-    elif sort_by == 'title':
-        posts = posts.order_by('title')  # Başlığa göre alfabetik sıralar
-    elif sort_by == 'solved':
-        posts = posts.order_by('-is_solved')  # Çözülenleri en önce gösterir
-    elif sort_by == 'upvotes':
-        posts = posts.order_by('-upvotes')  # En çok upvote alanları sıralar
-    elif sort_by == 'comments':
-        posts = posts.annotate(comment_count=Count('comments')).order_by('-comment_count')  # En fazla yorumu sıralar
+    # Handle sorting
+    sort_by = request.GET.get("sort_by", "none")  # Default to "none"
+    if sort_by == "date":
+        posts = posts.order_by("-created_at")
+    elif sort_by == "title":
+        posts = posts.order_by("title")
+    elif sort_by == "solved":
+        posts = posts.order_by("-is_solved")
+    elif sort_by == "upvotes":
+        posts = posts.order_by("-upvotes")
+    elif sort_by == "comments":
+        posts = posts.annotate(comment_count=Count("comments")).order_by("-comment_count")
+    # If "None" is selected, do not apply any sorting
+    # else:
+    # No ordering applied
 
     return render(request, 'searchResults.html', {'query': query, 'posts': posts, 'sort_by': sort_by})
 
 def advanced_search(request):
     filters = {}
+
+    # Title Filter
+    query = request.GET.get("title", "").strip()
+    if query:
+        filters["title__icontains"] = query
 
     # Price Range
     if request.GET.get("min_price"):
@@ -443,5 +452,23 @@ def advanced_search(request):
 
     # Query the database
     posts = Post.objects.filter(**filters).distinct().order_by('-created_at')
-    return render(request, 'searchResults.html', {'posts': posts})
+
+    # Sorting
+    # Handle sorting
+    sort_by = request.GET.get("sort_by", "none")  # Default to "none"
+    if sort_by == "date":
+        posts = posts.order_by("-created_at")
+    elif sort_by == "title":
+        posts = posts.order_by("title")
+    elif sort_by == "solved":
+        posts = posts.order_by("-is_solved")
+    elif sort_by == "upvotes":
+        posts = posts.order_by("-upvotes")
+    elif sort_by == "comments":
+        posts = posts.annotate(comment_count=Count("comments")).order_by("-comment_count")
+    # If "None" is selected, do not apply any sorting
+    # else:
+    # No ordering applied
+
+    return render(request, 'searchResults.html', {'posts': posts, 'query': query, 'sort_by': sort_by})
 

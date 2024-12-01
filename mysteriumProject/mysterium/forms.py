@@ -19,10 +19,132 @@ class CommentForm(forms.ModelForm):
 
 
 class AdvancedSearchForm(forms.Form):
-    min_price = forms.DecimalField(required=False, min_value=0, max_digits=10, decimal_places=2)
-    max_price = forms.DecimalField(required=False, min_value=0, max_digits=10, decimal_places=2)
-    color = forms.CharField(required=False, max_length=50)
-    material = forms.CharField(required=False, max_length=100)
+    title = forms.CharField(
+        required=False,
+        max_length=200,
+        widget=forms.TextInput(attrs={'placeholder': 'Search by title...', 'class': 'form-control'})
+    )
+    sort_by = forms.ChoiceField(
+        required=False,
+        choices=[
+            ('none', 'None'),
+            ('date', 'Date'),
+            ('title', 'Title'),
+            ('solved', 'Solved'),
+            ('upvotes', 'Upvotes'),
+            ('comments', 'Comments')
+        ],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    min_price = forms.DecimalField(
+        required=False,
+        min_value=0,
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'placeholder': 'Min Price', 'class': 'form-control'})
+    )
+    max_price = forms.DecimalField(
+        required=False,
+        min_value=0,
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'placeholder': 'Max Price', 'class': 'form-control'})
+    )
+    color = forms.CharField(
+        required=False,
+        max_length=50,
+        widget=forms.TextInput(attrs={'placeholder': 'Color', 'class': 'form-control'})
+    )
+    material = forms.CharField(
+        required=False,
+        max_length=100,
+        widget=forms.TextInput(attrs={'placeholder': 'Material', 'class': 'form-control'})
+    )
+    volume = forms.CharField(
+        required=False,
+        max_length=50,
+        widget=forms.TextInput(attrs={'placeholder': 'Volume (e.g., 500ml)', 'class': 'form-control'})
+    )
+    width = forms.CharField(
+        required=False,
+        max_length=50,
+        widget=forms.TextInput(attrs={'placeholder': 'Width (e.g., 10cm)', 'class': 'form-control'})
+    )
+    height = forms.CharField(
+        required=False,
+        max_length=50,
+        widget=forms.TextInput(attrs={'placeholder': 'Height (e.g., 15cm)', 'class': 'form-control'})
+    )
+    length = forms.CharField(
+        required=False,
+        max_length=50,
+        widget=forms.TextInput(attrs={'placeholder': 'Length (e.g., 20cm)', 'class': 'form-control'})
+    )
+    weight = forms.CharField(
+        required=False,
+        max_length=50,
+        widget=forms.TextInput(attrs={'placeholder': 'Weight (e.g., 500g)', 'class': 'form-control'})
+    )
+    condition = forms.CharField(
+        required=False,
+        max_length=50,
+        widget=forms.TextInput(attrs={'placeholder': 'Condition (e.g., New, Worn)', 'class': 'form-control'})
+    )
+    shape = forms.CharField(
+        required=False,
+        max_length=50,
+        widget=forms.TextInput(attrs={'placeholder': 'Shape (e.g., Cylindrical)', 'class': 'form-control'})
+    )
+    physical_state = forms.CharField(
+        required=False,
+        max_length=50,
+        widget=forms.TextInput(attrs={'placeholder': 'Physical State (e.g., Solid, Liquid)', 'class': 'form-control'})
+    )
+    sound = forms.CharField(
+        required=False,
+        max_length=50,
+        widget=forms.TextInput(attrs={'placeholder': 'Sound (e.g., Silent, Loud)', 'class': 'form-control'})
+    )
+    taste = forms.CharField(
+        required=False,
+        max_length=50,
+        widget=forms.TextInput(attrs={'placeholder': 'Taste (e.g., Bitter)', 'class': 'form-control'})
+    )
+    smell = forms.CharField(
+        required=False,
+        max_length=50,
+        widget=forms.TextInput(attrs={'placeholder': 'Smell (e.g., Floral)', 'class': 'form-control'})
+    )
+    functionality = forms.CharField(
+        required=False,
+        max_length=200,
+        widget=forms.TextInput(attrs={'placeholder': 'Functionality (e.g., Cutting wood)', 'class': 'form-control'})
+    )
+    location = forms.CharField(
+        required=False,
+        max_length=200,
+        widget=forms.Textarea(attrs={'placeholder': 'Location (e.g., Found in Norway)', 'class': 'form-control', 'rows': 2})
+    )
+    markings = forms.CharField(
+        required=False,
+        max_length=200,
+        widget=forms.Textarea(attrs={'placeholder': 'Markings (e.g., Symbols, Numbers)', 'class': 'form-control', 'rows': 2})
+    )
+    historical_context = forms.CharField(
+        required=False,
+        max_length=200,
+        widget=forms.Textarea(attrs={'placeholder': 'Historical Context (e.g., 18th century)', 'class': 'form-control', 'rows': 2})
+    )
+    distinctive_features = forms.CharField(
+        required=False,
+        max_length=200,
+        widget=forms.Textarea(attrs={'placeholder': 'Distinctive Features (e.g., Unique patterns)', 'class': 'form-control', 'rows': 2})
+    )
+    tags = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Enter tags separated by commas...', 'class': 'form-control'})
+    )
+
 
 
 
