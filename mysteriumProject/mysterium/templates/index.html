@@ -5,10 +5,10 @@
 <div class="index-page">
     <section class="hero">
         <h2>Find the Mystery</h2>
-        <form id="search-form" action="{% url 'search_tags' %}" method="get">
-            <input type="text" id="search-input" name="query" placeholder="Enter tags..." class="search-bar">
+        <form id="search-form" action="{% url 'basic_search' %}" method="get">
+            <input type="text" id="search-input" name="query" placeholder="Search by title..." class="search-bar">
             <button type="submit" class="search-btn">Search</button>
-        </form>
+        </form>        
 
         <div class="share-mystery">
             <a href="{% url 'postCreation' %}" class="btn btn-primary">Share Your Mystery</a>
@@ -34,7 +34,7 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ post.title }}</h5>
                     <p class="card-text">{{ post.description|truncatewords:10 }}</p>
-                    <p>Status: <span class="{% if post.is_solved %}solved{% else %}unsolved{% endif %}">
+                    <p>Mystery: <span class="{% if post.is_solved %}solved{% else %}unsolved{% endif %}">
                         {% if post.is_solved %}Solved{% else %}Unsolved{% endif %}
                     </span></p>
                     <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">Read More</a>
@@ -51,5 +51,5 @@
 
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="{% static 'js/wikidataFetch.js' %}"></script>
+<!--<script src="{% static 'js/wikidataFetch.js' %}"></script>-->
 {% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <section class="hero">
+        <h2>Find the Mystery</h2>
+        <form id="search-form" action="{% url 'basic_search' %}" method="get">
+            <input type="text" id="search-input" name="query" placeholder="Search by title..." class="search-bar"
+                value="{{ query|default:'' }}">
+
+                <select name="sort_by" class="search-sort">
+                    <option value="date" {% if request.GET.sort_by == 'date' %}selected{% endif %}>Sort by Date</option>
+                    <option value="title" {% if request.GET.sort_by == 'title' %}selected{% endif %}>Sort by Title</option>
+                    <option value="solved" {% if request.GET.sort_by == 'solved' %}selected{% endif %}>Solved Mysteries</option>
+                    <option value="upvotes" {% if request.GET.sort_by == 'upvotes' %}selected{% endif %}>Most Upvotes</option>
+                    <option value="comments" {% if request.GET.sort_by == 'comments' %}selected{% endif %}>Most Comments</option>
+                </select>
+
+            <button type="submit" class="search-btn">Search</button>
+        </form>        
+        <div class="share-mystery">
+            <a href="{% url 'postCreation' %}" class="btn btn-primary">Share Your Mystery</a>
+        </div>
+    </section>
+
+    <h2>Search Results for "{{ query }}"</h2>
+    <p>Sorted by: {{ sort_by }}</p>
+    {% if posts %}
+        <div class="row">
+            {% for post in posts %}
+                <div class="card m-2" style="width: 18rem;">
+                    {% if post.object_image %}
+                        <img src="{{ post.object_image.url }}" class="card-img-top" alt="Post Image">
+                    {% else %}
+                        <img src="{% static 'images/default-image.jpg' %}" class="card-img-top" alt="Default Image">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p class="card-text">{{ post.description|truncatewords:15 }}</p>
+                        <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No results found for "{{ query }}". Try searching with different keywords or check your spelling.</p>
+    {% endif %}
+</div>
+{% endblock %}

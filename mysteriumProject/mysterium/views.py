@@ -5,10 +5,12 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse
 from .models import Post, Comment
+from django.db.models import Count
 from .forms import PostForm, CommentForm
 from .wikidata_utils import fetch_wikidata_tags, fetch_wikidata_info
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q  # Q nesnesi ile çoklu filtreleme için
 
 # Create your views here.
 def register(request):
@@ -100,6 +102,7 @@ def post_detail(request, post_id):
     if post.tags:
         raw_tags = post.tags.split(',')
         for tag in raw_tags:
+            tag = tag.strip()
             if ' (Q' in tag:
                 parts = tag.split(' (Q')
                 tag_name = parts[0]
@@ -107,6 +110,7 @@ def post_detail(request, post_id):
                 tags.append((tag_name, q_number))
             else:
                 tags.append((tag, None))
+
 
     if request.method == 'POST':
         form = CommentForm(request.POST)
@@ -342,6 +346,9 @@ def edit_post(request, post_id):
             updated_post.functionality = form.cleaned_data.get('functionality', post.functionality)
             updated_post.location = form.cleaned_data.get('location', post.location)
 
+            tags = form.cleaned_data.get('tags', '').strip()
+            updated_post.tags = ', '.join([tag.strip() for tag in tags.split(',')])
+
             updated_post.save()
             messages.success(request, "Post updated successfully!")
             return redirect('post_detail', post_id=post.id)
@@ -355,13 +362,25 @@ def edit_post(request, post_id):
     return render(request, 'editPost.html', {'form': form, 'post': post})
 
 
+def basic_search(request):
+    query = request.GET.get('query', '')  # Arama sorgusu
+    sort_by = request.GET.get('sort_by', 'date')  # Varsayılan sıralama tarihi baz alır
 
-def search_tags(request):
-    results = []
-    query = request.GET.get('query', None)
+    # Post QuerySet'i
+    posts = Post.objects.filter(
+        title__icontains=query  # Başlık içinde arama
+    ) if query else Post.objects.none()
 
-    if query:
-        results = fetch_wikidata_tags(query)
-        print("Fetched Tags:", results)
+    # Sıralama Mantığı
+    if sort_by == 'date':
+        posts = posts.order_by('-created_at')  # En son eklenene göre sıralar
+    elif sort_by == 'title':
+        posts = posts.order_by('title')  # Başlığa göre alfabetik sıralar
+    elif sort_by == 'solved':
+        posts = posts.order_by('-is_solved')  # Çözülenleri en önce gösterir
+    elif sort_by == 'upvotes':
+        posts = posts.order_by('-upvotes')  # En çok upvote alanları sıralar
+    elif sort_by == 'comments':
+        posts = posts.annotate(comment_count=Count('comments')).order_by('-comment_count')  # En fazla yorumu sıralar
 
-    return JsonResponse({'results': results, 'query': query})
+    return render(request, 'searchResults.html', {'query': query, 'posts': posts, 'sort_by': sort_by})

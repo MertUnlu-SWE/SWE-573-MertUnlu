@@ -10,6 +10,12 @@ h2{
     color: antiquewhite;
 }
 
+p {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 5px; /* Round borders */
+    color: #000;
+}
+
 .solved {
     color: green;
     font-weight: bold;
@@ -110,6 +116,7 @@ h2{
 
 .glider-next, .glider-prev{
     color: antiquewhite;
+    font-size: 6rem !important; /* Arrow Size */
 }
 
 .glider-next:hover, .glider-prev:hover{
