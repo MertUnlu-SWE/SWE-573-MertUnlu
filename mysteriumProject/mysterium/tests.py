@@ -65,25 +65,34 @@ class ViewTests(TestCase):
                 content_type='image/jpeg'
             )
 
-        response = self.client.post('/postCreation/', {
-            'title': 'Test Post Creation',
-            'description': 'Test description for post creation',
+            response = self.client.post('/postCreation/', {
+            'title': 'Complete Post',
+            'description': 'This is a post with all fields filled.',
             'object_image': test_image,
             'tags': 'tag1, tag2, tag3',
-            'price': '123.45',
-            'volume': '500ml',
-            'width': '10cm',
-            'height': '20cm',
-            'length': '15cm',
-            'color': 'Red',
+            'price': '99.99',
+            'volume': '150 cm³',
+            'width': '10 cm',
+            'height': '15 cm',
+            'length': '20 cm',
+            'material': 'Steel',
+            'physical_state': 'Solid',
+            'condition': 'New',
+            'color': 'Silver',
+            'functionality': 'Decorative',
+            'location': 'USA',
         })
 
+        # Verify the response and post creation
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(Post.objects.filter(title='Test Post Creation').exists())
+        self.assertTrue(Post.objects.filter(title='Complete Post').exists())
 
-        created_post = Post.objects.get(title='Test Post Creation')
-        self.assertEqual(created_post.price, Decimal('123.45'))
-        self.assertEqual(created_post.color, 'Red')
+        created_post = Post.objects.get(title='Complete Post')
+        self.assertEqual(created_post.price, Decimal('99.99'))
+        self.assertEqual(created_post.material, 'Steel')
+        self.assertEqual(created_post.color, 'Silver')
+        self.assertEqual(created_post.location, 'USA')
+        self.assertEqual(created_post.volume, '150 cm³')
         self.assertEqual(created_post.tags.replace(" ", ""), 'tag1,tag2,tag3')
 
 

@@ -23,9 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
             })
                 .then(response => {
-                    console.log(`URL: ${url}`);
-console.log(`CSRF Token: ${csrfToken}`);
-
                     if (!response.ok) {
                         throw new Error(`Failed to update post. Status: ${response.status}`);
                     }
@@ -35,9 +32,11 @@ console.log(`CSRF Token: ${csrfToken}`);
                     if (data.post_is_solved) {
                         button.textContent = 'Mark as Unsolved';
                         alert('Post is now marked as solved.');
+                        location.reload(); // Refresh the page
                     } else {
                         button.textContent = 'Mark as Solved';
                         alert('Post is no longer solved.');
+                        location.reload(); // Refresh the page
                     }
                 })
                 .catch(error => {
