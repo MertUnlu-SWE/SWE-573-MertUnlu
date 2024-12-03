@@ -2,8 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 
 # Create your models here.
-
-
 class Post(models.Model):
     title = models.CharField(max_length=200)  # Title
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # User
@@ -56,3 +54,14 @@ class Comment(models.Model):
     downvotes = models.IntegerField(default=0)
     voted_users = models.ManyToManyField(User, related_name="voted_comments", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Vote(models.Model):
+    VOTE_TYPES = [('upvote', 'Upvote'), ('downvote', 'Downvote')]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='votes')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='votes')
+    vote_type = models.CharField(max_length=10, choices=VOTE_TYPES)
+
+    class Meta:
+        unique_together = ('user', 'post')  # Ensure a user can vote only once per post

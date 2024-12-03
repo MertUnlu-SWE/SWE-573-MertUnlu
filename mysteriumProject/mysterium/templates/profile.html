@@ -1,9 +1,37 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-5">
-    <h2>Welcome, {{ user.username }}</h2>
+    <h2>{{ is_own_profile|yesno:"Your Profile,Profile of " }}{{ user.username }}</h2>
     <p>Email: {{ user.email }}</p>
-    <p>First Name: {{ user.first_name }}</p>
-    <p>Last Name: {{ user.last_name }}</p>
+    {% if is_own_profile %}
+        <p>First Name: {{ user.first_name }}</p>
+        <p>Last Name: {{ user.last_name }}</p>
+    {% endif %}
+
+    <h2>{{ is_own_profile|yesno:"Your Posts,Posts by " }}{{ user.username }}</h2>
+    <div class="row">
+        {% for post in user_posts %}
+            <div class="col-md-4">
+                <div class="card mb-3" style="width: 18rem;">
+                    {% if post.object_image %}
+                        <img src="{{ post.object_image.url }}" class="card-img-top" alt="Post Image">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p class="card-text">{{ post.description|truncatewords:15 }}</p>
+                        <p>Status: 
+                            <span class="{% if post.is_solved %}solved{% else %}unsolved{% endif %}">
+                                {% if post.is_solved %}Solved{% else %}Unsolved{% endif %}
+                            </span>
+                        </p>
+                        <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">View Post</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p>{{ user.username }} has not created any posts yet.</p>
+        {% endfor %}
+    </div>
+
 </div>
 {% endblock %}

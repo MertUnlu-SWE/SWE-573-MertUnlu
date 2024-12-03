@@ -75,7 +75,20 @@ def login_view(request):
 
 @login_required
 def profile_view(request):
-    return render(request, 'profile.html', {'user': request.user})
+    user_posts = Post.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'profile.html', {'user': request.user, 'user_posts': user_posts})
+
+
+def user_profile(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    user_posts = Post.objects.filter(user=user).order_by('-created_at')
+    return render(request, 'profile.html', {
+        'user': user,
+        'user_posts': user_posts,
+        'is_own_profile': request.user == user
+    })
+
+
 
 def logout_view(request):
     logout(request)
@@ -130,30 +143,50 @@ def post_detail(request, post_id):
         'tags': tags,
     })
 
+
 def vote_post(request, post_id, vote_type):
     if not request.user.is_authenticated:
-        return JsonResponse({'error': 'You must login before upvoting or downvoting!'}, status=403)
+        return JsonResponse({'error': 'You must login before voting!'}, status=403)
 
-    
-    post = Post.objects.get(id=post_id)
-    print(f"DEBUG: Post ID: {post_id}, Vote Type: {vote_type}")  # Debugging
+    post = get_object_or_404(Post, id=post_id)
 
-    # Check if the user has already voted
-    if request.user in post.voted_users.all():
-        return JsonResponse({'error': 'You have already voted on this post.'}, status=403)
-    
-    # Increment the upvote or downvote count
+    # Check if the user has already voted on this post
+    user_vote = post.votes.filter(user=request.user).first()
+
+    # Handle vote toggling or changing
+    if user_vote:
+        if user_vote.vote_type == vote_type:
+            # User clicks the same vote type again: retract the vote
+            user_vote.delete()
+            if vote_type == 'upvote':
+                post.upvotes -= 1
+            elif vote_type == 'downvote':
+                post.downvotes -= 1
+            post.save()
+            return JsonResponse({'success': True, 'action': 'retracted', 'upvotes': post.upvotes, 'downvotes': post.downvotes})
+        else:
+            # User changes vote type: remove old vote and add new
+            if user_vote.vote_type == 'upvote':
+                post.upvotes -= 1
+            elif user_vote.vote_type == 'downvote':
+                post.downvotes -= 1
+
+            user_vote.vote_type = vote_type
+            user_vote.save()
+    else:
+        # User has not voted before: add new vote
+        post.votes.create(user=request.user, vote_type=vote_type)
+
+    # Adjust vote counts
     if vote_type == 'upvote':
         post.upvotes += 1
     elif vote_type == 'downvote':
         post.downvotes += 1
-    post.save()
-    print(f"DEBUG: Vote counts - Upvotes: {post.upvotes}, Downvotes: {post.downvotes}")  # Debugging
 
-    # Add the user to the voted_users field to track that they have voted
-    post.voted_users.add(request.user)
-    
-    return JsonResponse({'success': True, 'upvotes': post.upvotes, 'downvotes': post.downvotes})
+    post.save()
+    return JsonResponse({'success': True, 'action': 'voted', 'upvotes': post.upvotes, 'downvotes': post.downvotes})
+
+
 
 def vote_comment(request, comment_id, vote_type):
     if not request.user.is_authenticated:

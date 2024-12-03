@@ -152,7 +152,14 @@
             <!-- Tag Input -->
             <div class="mb-3">
                 <label for="tags" class="form-label">Tags</label>
-                {{ form.tags }}
+                <!--{{ form.tags }}-->
+                <input
+                type="text"
+                id="tags"
+                name="tags"
+                class="form-control"
+                value="{% if form.initial.tags %}{{ form.initial.tags|join:", " }}{% endif %}"
+                placeholder="Add tags separated by commas or press Enter">
                 <small class="form-text text-muted">Separate tags with commas (e.g., metal, red, 10cm).</small>
             </div>
 
