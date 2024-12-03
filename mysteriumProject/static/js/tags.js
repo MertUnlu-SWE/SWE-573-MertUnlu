@@ -21,11 +21,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Event listener for blur (when input loses focus)
-    tagInput.addEventListener('blur', function () {
-        tagInput.value = ''; // Clear input field
-    });
-
     // Process a new tag
     function processNewTag(newTag) {
         if (newTag && !isDuplicate(newTag)) {
