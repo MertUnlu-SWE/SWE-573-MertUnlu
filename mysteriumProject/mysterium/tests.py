@@ -65,35 +65,38 @@ class ViewTests(TestCase):
                 content_type='image/jpeg'
             )
 
-            response = self.client.post('/postCreation/', {
-            'title': 'Complete Post',
-            'description': 'This is a post with all fields filled.',
+        # Post data for creating a post
+        post_data = {
+            'title': 'Test Post Title',
+            'description': 'Test Post Description',
+            'tags': 'tag1, tag2',
+            'price': '123.45',
+            'volume': '300 cm³',
+            'width': '20 cm',
+            'height': '30 cm',
+            'length': '40 cm',
+            'material': 'Plastic',
+            'color': 'Red',
             'object_image': test_image,
-            'tags': 'tag1, tag2, tag3',
-            'price': '99.99',
-            'volume': '150 cm³',
-            'width': '10 cm',
-            'height': '15 cm',
-            'length': '20 cm',
-            'material': 'Steel',
-            'physical_state': 'Solid',
-            'condition': 'New',
-            'color': 'Silver',
-            'functionality': 'Decorative',
-            'location': 'USA',
-        })
+        }
 
-        # Verify the response and post creation
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(Post.objects.filter(title='Complete Post').exists())
+        # Make a POST request to create a post
+        response = self.client.post('/postCreation/', data=post_data)
 
-        created_post = Post.objects.get(title='Complete Post')
-        self.assertEqual(created_post.price, Decimal('99.99'))
-        self.assertEqual(created_post.material, 'Steel')
-        self.assertEqual(created_post.color, 'Silver')
-        self.assertEqual(created_post.location, 'USA')
-        self.assertEqual(created_post.volume, '150 cm³')
-        self.assertEqual(created_post.tags.replace(" ", ""), 'tag1,tag2,tag3')
+        # Verify the response redirects to the post detail page
+        self.assertEqual(response.status_code, 302)
+
+        # Verify the post is created in the database
+        created_post = Post.objects.get(title='Test Post Title')
+        self.assertIsNotNone(created_post)
+        self.assertEqual(created_post.description, 'Test Post Description')
+        self.assertEqual(created_post.price, Decimal('123.45'))
+        self.assertEqual(created_post.material, 'Plastic')
+        self.assertEqual(created_post.color, 'Red')
+        self.assertEqual(created_post.tags, 'tag1, tag2')
+
+        # Verify the success message
+        self.assertRedirects(response, f'/post/{created_post.id}/')
 
 
 
@@ -278,12 +281,29 @@ class ViewTests(TestCase):
 
 
     def test_profile_view(self):
-        self.client.login(username='testuser@example.com', password='testpass')
+        # Log in as the test user
+        self.client.login(username='testuser', password='testpass')
+
+        # Make a GET request to the profile view
         response = self.client.get('/profile/')
 
-        self.assertEqual(response.status_code, 200)  # Ensure successful access
-        # Ensure user data displayed
-        self.assertContains(response, 'testuser@example.com')
+        # Verify the response status
+        self.assertEqual(response.status_code, 200)
+
+        # Ensure the correct template is used
+        self.assertTemplateUsed(response, 'profile.html')
+
+        # Verify user information is displayed
+        self.assertContains(response, 'testuser')  # Username
+        self.assertContains(response, self.user.first_name or "")  # First Name
+        self.assertContains(response, self.user.last_name or "")  # Last Name
+
+        # Verify the user's posts are displayed
+        self.assertContains(response, self.post.title)  # Post title
+        self.assertContains(response, self.post.description)  # Post description
+
+        # Ensure only the test user's posts are shown
+        self.assertNotContains(response, self.other_user.username)
 
 
     def test_logout_view(self):
