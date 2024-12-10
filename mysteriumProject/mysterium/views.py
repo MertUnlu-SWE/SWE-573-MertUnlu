@@ -263,7 +263,7 @@ def unmark_as_solved(request, post_id):
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
 
-
+@login_required
 def post_creation(request):
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
@@ -271,6 +271,7 @@ def post_creation(request):
             if form.is_valid():
                 post = form.save(commit=False)
                 post.user = request.user
+                request.session['unsaved_post'] = form.cleaned_data
 
                 # Dynamically handle all fields in form.cleaned_data
                 for field, value in form.cleaned_data.items():
@@ -282,18 +283,23 @@ def post_creation(request):
                 post.tags = ', '.join(tag.strip() for tag in tags.split(','))
 
                 post.save()
+                del request.session['unsaved_post']  # Clear session if successfully saved
                 messages.success(request, "Post created successfully!")
                 return redirect('post_detail', post_id=post.id)
             else:
-                messages.error(request, "Invalid form data. Please check your input.")
+                # Form hatalarını yakala ve mesaj olarak kullanıcıya göster
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
         except Exception as e:
             messages.error(request, f"An error occurred while creating the post: {str(e)}")
             print(f"Error in post creation: {str(e)}")  # Debugging log
     else:
-        form = PostForm()
+        # On GET request, check if there are unsaved changes
+        unsaved_post = request.session.pop('unsaved_post', None)
+        form = PostForm(initial=unsaved_post) if unsaved_post else PostForm()
 
     return render(request, 'postCreation.html', {'form': form})
-
 
 
 
@@ -312,7 +318,13 @@ def fetch_wikidata(request):
             try:
                 results = fetch_wikidata_tags(tag)
                 if results:
-                    all_results[tag] = [{'qNumber': res[0].split('/')[-1], 'label': res[1]} for res in results]
+                    all_results[tag] = [
+                        {
+                            'qNumber': res[0].split('/')[-1],
+                            'label': res[1],
+                            'description': res[2]  # Açıklama ekleniyor
+                        } for res in results
+                    ]
                 else:
                     all_results[tag] = []
             except Exception as e:
@@ -344,8 +356,8 @@ def edit_post(request, post_id):
                 if form.cleaned_data[field] is not None:
                     setattr(updated_post, field, form.cleaned_data[field])
 
-            tags = form.cleaned_data.get('tags', '').strip()
-            updated_post.tags = ', '.join([tag.strip() for tag in tags.split(',')])
+            #tags = form.cleaned_data.get('tags', '').strip()
+            #updated_post.tags = ', '.join([tag.strip() for tag in tags.split(',')])
 
             updated_post.save()
             messages.success(request, "Post updated successfully!")
@@ -357,39 +369,31 @@ def edit_post(request, post_id):
         # GET isteği için formu mevcut post verisiyle başlat
         form = PostForm(instance=post)
 
-    return render(request, 'editPost.html', {'form': form, 'post': post})
+    # Mevcut tagleri parçala ve liste olarak gönder
+    existing_tags = post.tags.split(',') if post.tags else []
+    return render(request, 'editPost.html', {'form': form, 'post': post, 'existing_tags': existing_tags})
 
 
 def basic_search(request):
-    query = request.GET.get('query', '')  # Arama sorgusu
-    sort_by = request.GET.get('sort_by', 'date')  # Varsayılan sıralama tarihi baz alır
+    query = request.GET.get("query", "").strip()
+    if query:
+        # Filter titles by partial matches (case-insensitive)
+        posts = Post.objects.filter(title__icontains=query)
+    else:
+        posts = Post.objects.none()  # Return no results if the query is empty
 
-    # Post QuerySet'i
-    posts = Post.objects.filter(
-        title__icontains=query  # Başlık içinde arama
-    ) if query else Post.objects.none()
+    return render(request, 'searchResults.html', {
+        'posts': posts,
+        'query': query,
+        'method': 'basic',  # Indicate this is a basic search
+    })
 
-    # Handle sorting
-    sort_by = request.GET.get("sort_by", "none")  # Default to "none"
-    if sort_by == "date":
-        posts = posts.order_by("-created_at")
-    elif sort_by == "title":
-        posts = posts.order_by("title")
-    elif sort_by == "solved":
-        posts = posts.order_by("-is_solved")
-    elif sort_by == "upvotes":
-        posts = posts.order_by("-upvotes")
-    elif sort_by == "comments":
-        posts = posts.annotate(comment_count=Count("comments")).order_by("-comment_count")
-    # If "None" is selected, do not apply any sorting
-    # else:
-    # No ordering applied
 
-    return render(request, 'searchResults.html', {'query': query, 'posts': posts, 'sort_by': sort_by})
+
 
 def advanced_search(request):
     filters = {}
-
+    print("Advanced Search Called")
     # Title Filter
     query = request.GET.get("title", "").strip()
     if query:
@@ -468,5 +472,10 @@ def advanced_search(request):
     # else:
     # No ordering applied
 
-    return render(request, 'searchResults.html', {'posts': posts, 'query': query, 'sort_by': sort_by})
+    return render(request, 'searchResults.html', {
+        'posts': posts,
+        'query': query,
+        'sort_by': sort_by,
+        'method': 'advanced',  # Advanced search olduğunu belirtmek için
+    })
 

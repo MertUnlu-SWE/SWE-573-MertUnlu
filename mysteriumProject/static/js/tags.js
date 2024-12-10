@@ -1,81 +1,89 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const tagInput = document.querySelector('input[name="tags"]');
-    const tagsContainer = document.createElement('div');
-    tagsContainer.classList.add('tags-input');
-    tagInput.parentNode.insertBefore(tagsContainer, tagInput);
-
+    const searchTagBtn = document.getElementById('searchTagBtn');
+    const tagInput = document.querySelector('#tags');
+    const tagsContainer = document.getElementById('added-tags');
+    const searchResultsContainer = document.getElementById('search-results'); // Eksik tanım eklendi
+    const existingTagsContainer = document.getElementById('existing-tags');
     let tags = new Set();
 
-    // Initialize existing tags from the input field (if any)
-    const initialTags = tagInput.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
-    initialTags.forEach(tag => {
-        if (tag) addTag(tag); // Add to tags container and Set
-    });
-
-    // Event listener for Enter or comma key
-    tagInput.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter' || e.key === ',') {
-            e.preventDefault();
-            processNewTag(tagInput.value.trim());
-            tagInput.value = ''; // Clear input field
+    // Open Modal and Fetch Results
+    searchTagBtn.addEventListener('click', function () {
+        const tagQuery = tagInput.value.trim();
+        if (tagQuery) {
+            fetch(`/fetch_wikidata/?tags=${encodeURIComponent(tagQuery)}`)
+                .then(response => response.json())
+                .then(data => {
+                    searchResultsContainer.innerHTML = ''; // Clear old results
+                    if (data.results && data.results[tagQuery]) {
+                        const tags = data.results[tagQuery];
+                        tags.forEach(tag => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item';
+                            li.innerHTML = `<strong>${tag.label} (${tag.qNumber})</strong><br>${tag.description || 'No description available.'}`;
+                            li.addEventListener('click', function () {
+                                addTag(tag.label, tag.qNumber);
+                                $('#tagSearchModal').modal('hide'); // Hide modal
+                            });
+                            searchResultsContainer.appendChild(li);
+                        });
+                    } else {
+                        searchResultsContainer.innerHTML = '<li class="list-group-item">No results found.</li>';
+                    }
+                })
+                .catch(() => {
+                    searchResultsContainer.innerHTML = '<li class="list-group-item">Error fetching data. Try again later.</li>';
+                });
+            $('#tagSearchModal').modal('show'); // Show modal
         }
     });
 
-    // Process a new tag
-    function processNewTag(newTag) {
-        if (newTag && !isDuplicate(newTag)) {
-            fetchWikidataTag(newTag);
-        }
-    }
+    // Add Tag to Input
+    function addTag(tagLabel, qNumber = null) {
+        const formattedTag = qNumber ? `${tagLabel} (${qNumber})` : tagLabel;
 
-    // Check if a tag is already in the Set
-    function isDuplicate(tag) {
-        return Array.from(tags).some(t => t.toLowerCase() === tag.toLowerCase());
-    }
-
-    // Add a tag to the DOM and Set
-    function addTag(tag, qNumber = null) {
-        const formattedTag = qNumber ? `${tag} (${qNumber})` : tag;
         if (!isDuplicate(formattedTag)) {
             tags.add(formattedTag);
 
-            // Create the tag element
-            const tagElement = document.createElement('span');
+            // Yeni Tag için HTML Elementi Oluştur
+            const tagElement = document.createElement('div');
             tagElement.classList.add('tag');
-            tagElement.innerHTML = `${formattedTag} <button type="button">&times;</button>`;
+            tagElement.innerHTML = `
+                ${formattedTag} <button type="button" class="remove-tag">&times;</button>
+            `;
 
-            // Add event listener to remove tag
-            tagElement.querySelector('button').addEventListener('click', function () {
+            // Silme Butonuna Event Listener Ekle
+            tagElement.querySelector('.remove-tag').addEventListener('click', function () {
                 tags.delete(formattedTag);
                 tagElement.remove();
                 updateInputValue();
             });
 
-            tagsContainer.appendChild(tagElement); // Add to DOM
+            // Tag'i Görüntüleme Alanına Ekle
+            tagsContainer.appendChild(tagElement);
             updateInputValue();
         }
     }
 
-    // Fetch tag data from Wikidata
-    function fetchWikidataTag(tag) {
-        console.log(`Fetching Wikidata info for tag: ${tag}`);
-        fetch(`/fetch_wikidata/?tags=${encodeURIComponent(tag)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.results && data.results[tag] && data.results[tag].length > 0) {
-                    const firstResult = data.results[tag][0];
-                    addTag(firstResult.label, firstResult.qNumber);
-                } else {
-                    addTag(tag); // Add tag without qNumber
-                }
-            })
-            .catch(() => {
-                addTag(tag); // Add tag without qNumber if fetch fails
-            });
+    // Taglerin Input Alanına Güncellenmesi
+    function updateInputValue() {
+        tagInput.value = Array.from(tags).join(', ');
     }
 
-    // Update the input field value with tags from Set
-    function updateInputValue() {
-        tagInput.value = Array.from(tags).join(', '); // Join tags from Set
+    // Duplicate Kontrolü
+    function isDuplicate(tag) {
+        return Array.from(tags).some(existingTag => existingTag.toLowerCase() === tag.toLowerCase());
     }
+
+    // Mevcut tagleri input alanına ekle
+    function updateInput() {
+        const tags = Array.from(existingTagsContainer.children).map(tag => tag.querySelector('span').textContent.trim());
+        tagInput.value = tags.join(', ');
+    }
+
+    existingTagsContainer.addEventListener('click', function (e) {
+        if (e.target.classList.contains('remove-tag')) {
+            e.target.parentElement.remove();
+            updateInput();
+        }
+    });
 });

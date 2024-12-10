@@ -252,6 +252,12 @@ class PostForm(forms.ModelForm):
             'location', 'tags'
         ]
 
+    def clean_object_image(self):
+        object_image = self.cleaned_data.get('object_image')
+        if not object_image:
+            raise forms.ValidationError("An image is required for the post.")
+        return object_image
+
     def clean_tags(self):
         tags = self.cleaned_data.get('tags', '')
         tag_list = [tag.strip() for tag in tags.split(',') if tag.strip()]

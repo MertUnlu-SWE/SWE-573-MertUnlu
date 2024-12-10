@@ -29,6 +29,8 @@ RUN python manage.py collectstatic --noinput
 # Medya dosyaları için dizin oluştur
 RUN mkdir -p /var/media
 
+RUN chmod -R 755 /var/media
+
 EXPOSE 8000
 
 # Uygulama başlatma komutu

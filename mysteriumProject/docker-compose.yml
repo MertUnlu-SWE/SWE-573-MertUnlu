@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: django_app
     volumes:
       - ./media:/var/media
       - ./static:/var/static
@@ -16,15 +17,23 @@ services:
       - DATABASE_PASSWORD=${DB_PASSWORD}
       - DATABASE_HOST=${DB_HOST}
       - DATABASE_PORT=${DB_PORT}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
+      interval: 30s  # Her 30 saniyede bir kontrol
+      timeout: 10s   # Kontrol isteği için maksimum bekleme süresi
+      retries: 3     # 3 kez başarısız olursa "unhealthy" olarak işaretle
+      start_period: 10s  # Konteyner başlatıldıktan sonra ilk kontrol için bekleme süresi
 
   nginx:
     build:
       context: .
       dockerfile: nginx.Dockerfile
+    container_name: nginx
     ports:
       - "80:80"
     depends_on:
-      - django_app
+      django_app:
+        condition: service_healthy  # Nginx, Django "healthy" olana kadar bekler
     volumes:
       - ./media:/var/media
       - ./static:/var/static

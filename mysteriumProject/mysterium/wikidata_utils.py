@@ -41,7 +41,7 @@ def fetch_wikidata_tags(query):
             'search': query.strip(),
             'language': 'en',
             'format': 'json',
-            'limit': 5  # Limit results for clarity
+            'limit': 20  # İlk 20 sonucu döndür
         }
         headers = {'User-Agent': 'MyApp/1.0 (mailto:mertunlu10@gmail.com)'}
         response = requests.get(url, headers=headers, params=params)
@@ -52,11 +52,12 @@ def fetch_wikidata_tags(query):
             print(f"No results from Wikidata for query: {query}")  # Debug log
             return []
 
-        return [[f"https://www.wikidata.org/wiki/{entity['id']}", entity["label"]]
-                for entity in data.get("search", [])]
+        return [[
+            f"https://www.wikidata.org/wiki/{entity['id']}", 
+            entity["label"], 
+            entity.get("description", "No description available.")
+        ] for entity in data.get("search", [])]
     except requests.RequestException as e:
         raise Exception(f"Network error while fetching tags: {str(e)}")
     except Exception as e:
         raise Exception(f"Unexpected error fetching tags: {str(e)}")
-
-

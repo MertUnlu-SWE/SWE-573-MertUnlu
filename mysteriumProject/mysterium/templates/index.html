@@ -5,15 +5,19 @@
 <div class="index-page">
     <section class="hero">
         <h2>Find the Mystery</h2>
-        <form id="search-form" action="{% url 'advanced_search' %}" method="get">
+        <form id="search-form" action="/search/basic/" method="get">
             <input type="text" id="search-input" name="query" placeholder="Search by title..." class="search-bar">
-            <button type="button" class="filter-btn" onclick="toggleFilterModal()">Filter</button>
             <button type="submit" class="search-btn">Search</button>
         </form>
+        <button type="button" class="filter-btn" onclick="toggleFilterModal()">Filter</button>
 
         <div class="share-mystery">
-            <a href="{% url 'postCreation' %}" class="btn btn-primary">Share Your Mystery</a>
-        </div>
+            {% if user.is_authenticated %}
+                <a href="{% url 'postCreation' %}" class="btn btn-primary">Share Your Mystery</a>
+            {% else %}
+                <a href="{% url 'login' %}?next={% url 'postCreation' %}" class="btn btn-secondary">Login to Share</a>
+            {% endif %}
+        </div>        
     </section>
 
     <!-- Modal Background -->

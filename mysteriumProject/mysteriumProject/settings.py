@@ -62,6 +62,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -159,15 +161,14 @@ MEDIA_ROOT = '/var/media/'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = '/var/static'
-#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Statik dosyalar için kök dizin
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Özel statik dosyalar
 
-#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
-if DEBUG:
-    import mimetypes
-    mimetypes.add_type("text/css", ".css", True)
+
+import mimetypes
+mimetypes.add_type("text/css", ".css", True)
 
 
 
