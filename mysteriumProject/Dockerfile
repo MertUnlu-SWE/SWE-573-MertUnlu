@@ -12,6 +12,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Proje dosyalarını kopyalayın
 COPY . .
 
+#VOLUME /var/media
+
 # Ortam değişkenleri tanımlayın (isteğe bağlı)
 ENV DB_NAME=postgres
 ENV DB_USER=mysteriumMert
@@ -31,6 +33,3 @@ EXPOSE 8000
 
 # Uygulama başlatma komutu
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "mysteriumProject.wsgi:application"]
-
-# Django komutlarını çalıştırmak için entrypoint ayarlayın
-#CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

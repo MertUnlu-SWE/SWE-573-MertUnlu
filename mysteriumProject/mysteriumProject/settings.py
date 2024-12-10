@@ -30,6 +30,8 @@ DEBUG =  os.getenv("IS_DEVELOPMENT", False)
 #ALLOWED_HOSTS = [os.getenv("localhost", "127.0.0.1")]
 #ALLOWED_HOSTS = ["13.53.116.156"]
 ALLOWED_HOSTS = [
+    'mysterium.onrender.com',
+    'www.mysterium.onrender.com',
     'swe-573-mertunlu.onrender.com', 
     '91.93.225.91/32', 
     '13.53.116.156', 
@@ -39,6 +41,8 @@ ALLOWED_HOSTS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
+    'https://mysterium.onrender.com',
+    'https://www.mysterium.onrender.com',
     'https://swe-573-mertunlu.onrender.com',
     'http://localhost',
 ]
@@ -148,21 +152,17 @@ USE_TZ = True
 
 # Media
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/media'
+MEDIA_ROOT = '/var/media/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Statik dosyalar için kök dizin
+STATIC_ROOT = '/var/static'
+#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Statik dosyalar için kök dizin
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Özel statik dosyalar
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-#SECURE_SSL_REDIRECT = True
-#SECURE_HSTS_SECONDS = 3600  # 1 saat boyunca HTTPS kullanılır
-#SECURE_BROWSER_XSS_FILTER = True
-#SECURE_CONTENT_TYPE_NOSNIFF = True
+#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 if DEBUG:

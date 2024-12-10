@@ -1,0 +1,35 @@
+services:
+  django_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./media:/var/media
+      - ./static:/var/static
+    image: mertunlu453/mysterium:v3  # Docker Hub'daki repository ve tag
+    command: gunicorn mysteriumProject.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_NAME=${DB_NAME}
+      - DATABASE_USER=${DB_USER}
+      - DATABASE_PASSWORD=${DB_PASSWORD}
+      - DATABASE_HOST=${DB_HOST}
+      - DATABASE_PORT=${DB_PORT}
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - django_app
+    volumes:
+      - ./media:/var/media
+      - ./static:/var/static
+
+volumes:
+  media:
+      driver: local
+  db_data:
