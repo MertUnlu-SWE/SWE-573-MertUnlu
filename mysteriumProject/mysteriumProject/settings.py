@@ -31,17 +31,22 @@ DEBUG =  os.getenv("IS_DEVELOPMENT", False)
 #ALLOWED_HOSTS = ["13.53.116.156"]
 ALLOWED_HOSTS = [
     'mysterium.onrender.com',
+    'mysterium-nginx-latest.onrender.com',
     'www.mysterium.onrender.com',
-    'swe-573-mertunlu.onrender.com', 
+    'swe-573-mertunlu.onrender.com',
+    'django_app', 
     '91.93.225.91/32', 
     '13.53.116.156', 
-    '127.0.0.1', 
+    '127.0.0.1',
+    '172.18.0.2',
+    '172.19.0.2', 
     'localhost', 
     '[::1]'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://mysterium.onrender.com',
+    'https://mysterium-nginx-latest.onrender.com',
     'https://www.mysterium.onrender.com',
     'https://swe-573-mertunlu.onrender.com',
     'http://localhost',
@@ -62,9 +67,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.cache.FetchFromCacheMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -152,9 +157,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Media
-MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/media/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -165,6 +167,18 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Özel statik dosyalar
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Medya dosyaları
+#MEDIA_URL = '/media/'
+#MEDIA_ROOT = '/var/media'
+
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
 
 
 import mimetypes

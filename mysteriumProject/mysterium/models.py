@@ -1,4 +1,5 @@
 from django.db import models
+import boto3
 from django.contrib.auth.models import User
 
 # Create your models here.
@@ -42,6 +43,18 @@ class Post(models.Model):
         related_name='solved_posts',
         help_text="The comment that solves this post."
     )
+
+    def delete(self, *args, **kwargs):
+        # S3 bağlantısını başlat
+        s3 = boto3.client('s3')
+        bucket_name = 'mysterium-media'
+
+        # S3'teki dosyayı sil
+        if self.object_image:
+            s3.delete_object(Bucket=bucket_name, Key=str(self.object_image))
+
+        # Veritabanından postu sil
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return self.title

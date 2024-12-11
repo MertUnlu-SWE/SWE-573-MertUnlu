@@ -282,6 +282,7 @@ def post_creation(request):
                 tags = form.cleaned_data.get('tags', '').strip()
                 post.tags = ', '.join(tag.strip() for tag in tags.split(','))
 
+                post.object_image = request.FILES['object_image']
                 post.save()
                 del request.session['unsaved_post']  # Clear session if successfully saved
                 messages.success(request, "Post created successfully!")

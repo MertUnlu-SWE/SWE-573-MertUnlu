@@ -4,10 +4,12 @@ FROM python:3.12.7
 # Çalışma dizinini ayarlayın
 WORKDIR /app/mysteriumProject
 
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev
+
 # Bağımlılıkları yükleyin
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-
 
 # Proje dosyalarını kopyalayın
 COPY . .
@@ -26,12 +28,12 @@ RUN pip install whitenoise
 # Statik dosyaları toplayın
 RUN python manage.py collectstatic --noinput
 
-# Medya dosyaları için dizin oluştur
-RUN mkdir -p /var/media
-
-RUN chmod -R 755 /var/media
+# Statik ve medya dosyalarını düzenle
+#RUN mkdir -p /var/media
+#RUN chmod -R 755 /var/media
 
 EXPOSE 8000
 
 # Uygulama başlatma komutu
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "mysteriumProject.wsgi:application"]
+CMD ["gunicorn", "mysteriumProject.wsgi:application", "--bind", "0.0.0.0:8000"]
+
