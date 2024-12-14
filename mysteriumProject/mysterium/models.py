@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 import boto3
 from django.contrib.auth.models import User
 
@@ -45,16 +46,16 @@ class Post(models.Model):
     )
 
     def delete(self, *args, **kwargs):
-        # S3 bağlantısını başlat
-        s3 = boto3.client('s3')
-        bucket_name = 'mysterium-media'
-
-        # S3'teki dosyayı sil
-        if self.object_image:
-            s3.delete_object(Bucket=bucket_name, Key=str(self.object_image))
-
-        # Veritabanından postu sil
-        super().delete(*args, **kwargs)
+        if self.object_image:  # Delete the image from S3
+            s3 = boto3.client('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                              aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+            bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+            try:
+                s3.delete_object(Bucket=bucket_name, Key=self.object_image.name)
+                print(f"Deleted {self.object_image.name} from S3 bucket.")
+            except Exception as e:
+                print(f"Error deleting {self.object_image.name}: {e}")
+        super().delete(*args, **kwargs)  # Call the parent class delete method
 
     def __str__(self):
         return self.title

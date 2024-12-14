@@ -56,13 +56,14 @@ CSRF_TRUSTED_ORIGINS = [
 # Application definition
 
 INSTALLED_APPS = [
+    'mysterium',
+    'storages',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'mysterium'
+    'django.contrib.staticfiles'
 ]
 
 MIDDLEWARE = [
@@ -162,29 +163,40 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/var/static'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Özel statik dosyalar
+STATIC_ROOT = BASE_DIR / 'static'
+#STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Özel statik dosyalar
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Medya dosyaları
-#MEDIA_URL = '/media/'
-#MEDIA_ROOT = '/var/media'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATICFILES_FOLDER = 'static'
+MEDIAFILES_FOLDER = 'media'
+#STATICFILES_STORAGE = 'custom_storages.StaticFilesStorage'
+#DEFAULT_FILE_STORAGE = 'custom_storages.MediaFilesStorage'
+
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
 
 
+STORAGES = {
+    "default": {
+        "BACKEND": "custom_storages.MediaFilesStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "custom_storages.StaticFilesStorage",
+    }
+}
+#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 import mimetypes
 mimetypes.add_type("text/css", ".css", True)
-
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

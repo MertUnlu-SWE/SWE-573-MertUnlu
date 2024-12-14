@@ -9,8 +9,10 @@ from django.db.models import Count
 from .forms import PostForm, CommentForm
 from .wikidata_utils import fetch_wikidata_tags, fetch_wikidata_info
 from django.contrib import messages
+import boto3
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q  # Q nesnesi ile çoklu filtreleme için
+
 
 # Create your views here.
 def register(request):
@@ -282,8 +284,16 @@ def post_creation(request):
                 tags = form.cleaned_data.get('tags', '').strip()
                 post.tags = ', '.join(tag.strip() for tag in tags.split(','))
 
+                if 'object_image' in request.FILES:
+                    print("Object Image Detected in Request Files")  # Debugging Log
+                else:
+                    print("Object Image NOT Found in Request Files")  # Debugging Log
+
                 post.object_image = request.FILES['object_image']
+                print(f"Object Image: {post.object_image}")  # Debugging Log
+
                 post.save()
+                print(f"Image uploaded to: {post.object_image.url}")
                 del request.session['unsaved_post']  # Clear session if successfully saved
                 messages.success(request, "Post created successfully!")
                 return redirect('post_detail', post_id=post.id)
@@ -352,13 +362,22 @@ def edit_post(request, post_id):
         if form.is_valid():
             updated_post = form.save(commit=False)
 
+            # Handle image replacement
+            if 'object_image' in request.FILES:
+                if post.object_image:  # Delete the old image from S3
+                    s3 = boto3.client('s3')
+                    bucket_name = 'mysterium-media'
+                    try:
+                        s3.delete_object(Bucket=bucket_name, Key=str(post.object_image))
+                    except Exception as e:
+                        print(f"Failed to delete old image: {e}")
+
+            updated_post.object_image = request.FILES['object_image']
+
             # Update only provided fields, keep others unchanged
             for field in form.cleaned_data:
                 if form.cleaned_data[field] is not None:
                     setattr(updated_post, field, form.cleaned_data[field])
-
-            #tags = form.cleaned_data.get('tags', '').strip()
-            #updated_post.tags = ', '.join([tag.strip() for tag in tags.split(',')])
 
             updated_post.save()
             messages.success(request, "Post updated successfully!")
