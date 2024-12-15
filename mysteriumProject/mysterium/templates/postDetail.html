@@ -125,12 +125,14 @@
                         <small>{{ comment.created_at }}</small>
 
                         <!-- Bookmark Button -->
-                        {% if comment.user == request.user %}
-                            {% if comment.id in bookmarked_comment_ids %}
-                                <button class="btn btn-danger btn-sm unbookmark-btn" data-comment-id="{{ comment.id }}">Unbookmark</button>
-                            {% else %}
-                                <button class="btn btn-primary btn-sm bookmark-btn" data-comment-id="{{ comment.id }}">Bookmark</button>
-                            {% endif %}
+                        {% if request.user.is_authenticated %}
+                            <button 
+                                class="btn btn-sm {% if comment.id in bookmarked_comment_ids %}btn-danger{% else %}btn-primary{% endif %} bookmark-toggle-btn" 
+                                data-comment-id="{{ comment.id }}">
+                                {% if comment.id in bookmarked_comment_ids %}Unbookmark{% else %}Bookmark{% endif %}
+                            </button>
+                        {% else %}
+                            <p><em>You must log in to bookmark comments.</em></p>
                         {% endif %}
 
     
@@ -141,7 +143,8 @@
                     
                             <!-- Toggle Mark as Solved/Unsolved -->
                             {% if request.user == post.user %}
-                                <button class="btn btn-outline-success btn-sm mark-as-solved-btn" data-comment-id="{{ comment.id }}">
+                                <button class="btn btn-outline-success btn-sm mark-as-solved-btn" data-comment-id="{{ comment.id }}"
+                                data-action="{% if post.solved_comment.id == comment.id %}unmark{% else %}mark{% endif %}">
                                     {% if post.solved_comment and post.solved_comment.id == comment.id %}
                                         Mark as Unsolved
                                     {% else %}
@@ -187,10 +190,11 @@
         // Handle post upvote/downvote
         $('#upvote-btn').click(function() {
             $.ajax({
-                url: '/post/{{ post.id }}/upvote/',
+                url: '/post/{{ post.id }}/upvote/?_=${new Date().getTime()}',
                 method: 'POST',
                 headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                 success: function(data) {
+                    console.log("Upvote Response:", data); // Backend'den gelen yanıtı kontrol et
                     $('#upvote-count').text(data.upvotes);
                 },
                 error: function(xhr) {
@@ -205,7 +209,7 @@
     
         $('#downvote-btn').click(function() {
             $.ajax({
-                url: '/post/{{ post.id }}/downvote/',
+                url: '/post/{{ post.id }}/downvote/?_=${new Date().getTime()}',
                 method: 'POST',
                 headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                 success: function(data) {
@@ -225,7 +229,7 @@
         {% for comment in comments %}
         $('#upvote-btn-{{ comment.id }}').click(function() {
             $.ajax({
-                url: '/comment/{{ comment.id }}/upvote/',
+                url: '/comment/{{ comment.id }}/upvote/?_=${new Date().getTime()}', // Cache busting
                 method: 'POST',
                 headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                 success: function(data) {
@@ -243,7 +247,7 @@
     
         $('#downvote-btn-{{ comment.id }}').click(function() {
             $.ajax({
-                url: '/comment/{{ comment.id }}/downvote/',
+                url: '/comment/{{ comment.id }}/downvote/?_=${new Date().getTime()}',
                 method: 'POST',
                 headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                 success: function(data) {
@@ -266,51 +270,38 @@
 <script>
     $(document).ready(function () {
         const csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-        let debounceTimer = null;
-
-        function debounce(func, delay) {
-            return function (...args) {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => func.apply(this, args), delay);
-            };
-        }
     
-        // Bookmark functionality
-        $(document).on('click', '.bookmark-btn', debounce(function () {
+        $(document).on('click', '.bookmark-toggle-btn', function () {
             const button = $(this);
             const commentId = button.data('comment-id');
-            $.ajax({
-                url: `/comment/${commentId}/bookmark/`,
-                method: 'POST',
-                headers: { 'X-CSRFToken': csrfToken },
-                success: function (data) {
-                    if (data.success) {
-                        button.text('Unbookmark')
-                              .removeClass('btn-primary bookmark-btn')
-                              .addClass('btn-danger unbookmark-btn');
-                    }
-                },
-            });
-        }, 500));
+            const isBookmarked = button.hasClass('btn-danger'); // Class kontrolü
         
-        $(document).on('click', '.unbookmark-btn', debounce(function () {
-            const button = $(this);
-            const commentId = button.data('comment-id');
+            const url = isBookmarked
+                ? `/comment/${commentId}/unbookmark/?_=${new Date().getTime()}` // Cache busting
+                : `/comment/${commentId}/bookmark/?_=${new Date().getTime()}`;
+        
             $.ajax({
-                url: `/comment/${commentId}/unbookmark/`,
+                url: url,
                 method: 'POST',
-                headers: { 'X-CSRFToken': csrfToken },
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
                 success: function (data) {
+                    console.log("Bookmark Response:", data); // Backend verisini kontrol et
                     if (data.success) {
-                        button.text('Bookmark')
-                              .removeClass('btn-danger unbookmark-btn')
-                              .addClass('btn-primary bookmark-btn');
+                        if (isBookmarked) {
+                            button.removeClass('btn-danger').addClass('btn-primary').text('Bookmark');
+                        } else {
+                            button.removeClass('btn-primary').addClass('btn-danger').text('Unbookmark');
+                        }
+                    } else {
+                        alert(data.message);
                     }
                 },
+                error: function (xhr) {
+                    console.error("Bookmark Error:", xhr);
+                    alert('An error occurred.');
+                }
             });
-        }, 500));
+        });        
     });    
 </script>
-
 {% endblock %}

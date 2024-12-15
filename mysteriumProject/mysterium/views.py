@@ -114,12 +114,6 @@ def post_detail(request, post_id):
     if request.method == 'POST' and not request.user.is_authenticated:
         return JsonResponse({'error': 'You must login to add a comment!'}, status=403)
     
-    # Login Check
-    if request.user.is_authenticated:
-        bookmarks = Bookmark.objects.filter(user=request.user, comment__in=comments)
-        bookmarked_comment_ids = set(bookmarks.values_list('comment_id', flat=True))
-    else:
-        bookmarked_comment_ids = set()  # Anonymus Users
 
     tags = []
     if post.tags:
@@ -146,6 +140,13 @@ def post_detail(request, post_id):
     else:
         form = CommentForm()
 
+    # Login Check
+    if request.user.is_authenticated:
+        bookmarks = Bookmark.objects.filter(user=request.user, comment__in=comments)
+        bookmarked_comment_ids = set(bookmarks.values_list('comment_id', flat=True))
+    else:
+        bookmarked_comment_ids = set()  # Anonymus Users
+
     return render(request, 'postDetail.html', {
         'post': post,
         'comments': comments,
@@ -154,7 +155,7 @@ def post_detail(request, post_id):
         'bookmarked_comment_ids': bookmarked_comment_ids,
     })
 
-
+@login_required
 def vote_post(request, post_id, vote_type):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'You must login before voting!'}, status=403)
@@ -198,7 +199,7 @@ def vote_post(request, post_id, vote_type):
     return JsonResponse({'success': True, 'action': 'voted', 'upvotes': post.upvotes, 'downvotes': post.downvotes})
 
 
-
+@login_required
 def vote_comment(request, comment_id, vote_type):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'You must login before commenting!'}, status=403)
@@ -275,7 +276,6 @@ def unmark_as_solved(request, post_id):
 
 
 @login_required
-@transaction.atomic
 def bookmark_comment(request, comment_id):
     if request.method == 'POST':
         comment = get_object_or_404(Comment, id=comment_id)
@@ -290,7 +290,6 @@ def bookmark_comment(request, comment_id):
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
 @login_required
-@transaction.atomic
 def unbookmark_comment(request, comment_id):
     if request.method == 'POST':
         comment = get_object_or_404(Comment, id=comment_id)

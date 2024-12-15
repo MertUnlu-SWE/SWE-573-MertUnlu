@@ -10,6 +10,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from .models import Post, Comment, Bookmark
 from .forms import PostForm, CommentForm
 from pathlib import Path
+from moto import mock_s3
 
 
 class ViewTests(TestCase):
@@ -212,22 +213,62 @@ class ViewTests(TestCase):
 
 
     def test_bookmark_comment(self):
+        """Test that a user can bookmark a comment."""
+        self.client.login(username='testuser', password='testpass')
         response = self.client.post(f'/comment/{self.comment.id}/bookmark/')
         self.assertEqual(response.status_code, 200)
         self.assertTrue(Bookmark.objects.filter(user=self.user, comment=self.comment).exists())
+        self.assertEqual(response.json().get('success'), True)
+        self.assertEqual(response.json().get('action'), 'bookmarked')
 
 
     def test_unbookmark_comment(self):
+        """Test that a user can unbookmark a comment."""
         Bookmark.objects.create(user=self.user, comment=self.comment)
+        self.client.login(username='testuser', password='testpass')
         response = self.client.post(f'/comment/{self.comment.id}/unbookmark/')
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Bookmark.objects.filter(user=self.user, comment=self.comment).exists())
+        self.assertEqual(response.json().get('success'), True)
+        self.assertEqual(response.json().get('action'), 'unbookmarked')
 
 
     def test_view_bookmarked_comments(self):
+        self.client.login(username='testuser', password='testpass')
         Bookmark.objects.create(user=self.user, comment=self.comment)
         response = self.client.get('/profile/')
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Test Comment')
+
+
+    def test_duplicate_bookmark(self):
+        """Test that duplicate bookmarks are not allowed."""
+        Bookmark.objects.create(user=self.user, comment=self.comment)
+        self.client.login(username='testuser', password='testpass')
+        response = self.client.post(f'/comment/{self.comment.id}/bookmark/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json().get('success'), False)
+        self.assertIn('Already bookmarked', response.json().get('message'))
+
+    def test_unbookmark_nonexistent(self):
+        """Test unbookmarking a comment that is not bookmarked."""
+        self.client.login(username='testuser', password='testpass')
+        response = self.client.post(f'/comment/{self.comment.id}/unbookmark/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json().get('success'), False)
+        self.assertIn('Not bookmarked', response.json().get('message'))
+
+    def test_unauthenticated_bookmark(self):
+        """Test that unauthenticated users cannot bookmark a comment."""
+        response = self.client.post(f'/comment/{self.comment.id}/bookmark/')
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(Bookmark.objects.filter(user=self.user, comment=self.comment).exists())
+        self.assertIn('You must login', response.json().get('error'))
+
+    def test_unauthenticated_bookmark(self):
+        response = self.client.post(f'/comment/{self.comment.id}/bookmark/')
+        self.assertEqual(response.status_code, 403)
+        self.assertIn('You must login', response.json().get('error'))
 
 
     def test_basic_search(self):
