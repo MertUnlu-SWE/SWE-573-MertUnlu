@@ -34,5 +34,17 @@
         {% endfor %}
     </div>
 
+    <h2>Your Bookmarked Comments</h2>
+    <div class="bookmarked-comments">
+        {% for bookmark in bookmarked_comments %}
+            <div class="comment bg-light p-3 mb-2 rounded">
+                <p>{{ bookmark.comment.text }}</p>
+                <a href="{% url 'post_detail' bookmark.comment.post.id %}" class="btn btn-primary btn-sm">Go to Post</a>
+            </div>
+        {% empty %}
+            <p>You have no bookmarked comments.</p>
+        {% endfor %}
+    </div>
+
 </div>
 {% endblock %}

@@ -7,7 +7,7 @@ from .wikidata_utils import fetch_wikidata_info, fetch_wikidata_tags
 from unittest.mock import patch
 from unittest.mock import patch
 from django.core.files.uploadedfile import SimpleUploadedFile
-from .models import Post, Comment
+from .models import Post, Comment, Bookmark
 from .forms import PostForm, CommentForm
 from pathlib import Path
 
@@ -209,6 +209,25 @@ class ViewTests(TestCase):
         self.post.refresh_from_db()
         # Ensure post is no longer solved
         self.assertFalse(self.post.is_solved)
+
+
+    def test_bookmark_comment(self):
+        response = self.client.post(f'/comment/{self.comment.id}/bookmark/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Bookmark.objects.filter(user=self.user, comment=self.comment).exists())
+
+
+    def test_unbookmark_comment(self):
+        Bookmark.objects.create(user=self.user, comment=self.comment)
+        response = self.client.post(f'/comment/{self.comment.id}/unbookmark/')
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Bookmark.objects.filter(user=self.user, comment=self.comment).exists())
+
+
+    def test_view_bookmarked_comments(self):
+        Bookmark.objects.create(user=self.user, comment=self.comment)
+        response = self.client.get('/profile/')
+        self.assertContains(response, 'Test Comment')
 
 
     def test_basic_search(self):

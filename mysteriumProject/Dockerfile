@@ -1,22 +1,20 @@
-# Base image olarak Python kullanın
+# Base image for Python Version
 FROM python:3.12.7
 
-# Çalışma dizinini ayarlayın
+# Working Directory Setting
 WORKDIR /app/mysteriumProject
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev
 
-# Bağımlılıkları yükleyin
+# Get Requirements
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Proje dosyalarını kopyalayın
+# Copy Project Files
 COPY . .
 
-#VOLUME /var/media
-
-# Ortam değişkenleri tanımlayın (isteğe bağlı)
+# Define Env Variables (Optional)
 ENV DB_NAME=postgres
 ENV DB_USER=mysteriumMert
 ENV DB_PASSWORD=Mert539Unlu
@@ -25,15 +23,11 @@ ENV DB_PORT=5432
 
 RUN pip install whitenoise
 
-# Statik dosyaları toplayın
+# Collect Static Files
 RUN python manage.py collectstatic --noinput
-
-# Statik ve medya dosyalarını düzenle
-#RUN mkdir -p /var/media
-#RUN chmod -R 755 /var/media
 
 EXPOSE 8000
 
-# Uygulama başlatma komutu
+# Application Start Command
 CMD ["gunicorn", "mysteriumProject.wsgi:application", "--bind", "0.0.0.0:8000"]
 

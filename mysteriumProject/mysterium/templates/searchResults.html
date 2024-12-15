@@ -114,12 +114,10 @@
 <script>
     function toggleFilterModal() {
         console.log("Toggle Filter Modal triggered");
-    
-        // Modal ve arka plan elemanlarını alıyoruz
+
         const modal = document.getElementById("filter-modal");
         const background = document.getElementById("modal-background");
     
-        // Mevcut görünüme göre modal ve arka planın görünürlük durumunu değiştiriyoruz
         if (modal.style.display === "block") {
             modal.style.display = "none";
             background.style.display = "none";
@@ -129,7 +127,6 @@
         }
     }
     
-    // Arka plana tıklanınca modalı kapatma
     document.getElementById("modal-background").addEventListener("click", () => {
         document.getElementById("filter-modal").style.display = "none";
         document.getElementById("modal-background").style.display = "none";

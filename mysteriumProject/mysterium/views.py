@@ -4,14 +4,12 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse
-from .models import Post, Comment
+from .models import Post, Comment, Bookmark
 from django.db.models import Count
 from .forms import PostForm, CommentForm
 from .wikidata_utils import fetch_wikidata_tags, fetch_wikidata_info
 from django.contrib import messages
 import boto3
-from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Q  # Q nesnesi ile çoklu filtreleme için
 
 
 # Create your views here.
@@ -38,14 +36,11 @@ def register(request):
     return render(request, 'login.html')
 
 def login_view(request):
-    # Kullanıcının geldiği URL'yi sakla (login sayfasından önceki sayfa)
     if 'next' not in request.GET and 'HTTP_REFERER' in request.META:
         previous_url = request.META.get('HTTP_REFERER', '/')
-        # Eğer önceki URL login sayfası değilse, session'a kaydet
         if not previous_url.endswith('/login/'):
             request.session['previous_url'] = previous_url
 
-    # next parametresi veya session'dan gelen önceki URL'yi al
     next_url = request.GET.get('next', request.session.get('previous_url', '/'))
 
     if request.method == 'POST':
@@ -78,7 +73,12 @@ def login_view(request):
 @login_required
 def profile_view(request):
     user_posts = Post.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'profile.html', {'user': request.user, 'user_posts': user_posts})
+    bookmarked_comments = Bookmark.objects.filter(user=request.user).select_related('comment__post')
+    return render(request, 'profile.html', {
+        'user': request.user,
+        'user_posts': user_posts,
+        'bookmarked_comments': bookmarked_comments,
+    })
 
 
 def user_profile(request, user_id):
@@ -112,6 +112,13 @@ def post_detail(request, post_id):
     # Login Check
     if request.method == 'POST' and not request.user.is_authenticated:
         return JsonResponse({'error': 'You must login to add a comment!'}, status=403)
+    
+    # Login Check
+    if request.user.is_authenticated:
+        bookmarks = Bookmark.objects.filter(user=request.user, comment__in=comments)
+        bookmarked_comment_ids = set(bookmarks.values_list('comment_id', flat=True))
+    else:
+        bookmarked_comment_ids = set()  # Anonymus Users
 
     tags = []
     if post.tags:
@@ -134,7 +141,7 @@ def post_detail(request, post_id):
             new_comment.post = post
             new_comment.user = request.user
             new_comment.save()
-            return redirect('post_detail', post_id=post.id)  # Yönlendirme ekle
+            return redirect('post_detail', post_id=post.id)
     else:
         form = CommentForm()
 
@@ -143,6 +150,7 @@ def post_detail(request, post_id):
         'comments': comments,
         'form': form,
         'tags': tags,
+        'bookmarked_comment_ids': bookmarked_comment_ids,
     })
 
 
@@ -266,6 +274,28 @@ def unmark_as_solved(request, post_id):
 
 
 @login_required
+def bookmark_comment(request, comment_id):
+    if request.method == 'POST':
+        comment = get_object_or_404(Comment, id=comment_id)
+        bookmark, created = Bookmark.objects.get_or_create(user=request.user, comment=comment)
+
+        if created:
+            return JsonResponse({'success': True, 'action': 'bookmarked', 'comment_id': comment.id})
+        return JsonResponse({'success': False, 'message': 'Already bookmarked.'})
+    return JsonResponse({'error': 'Invalid request method.'}, status=400)
+
+@login_required
+def unbookmark_comment(request, comment_id):
+    if request.method == 'POST':
+        comment = get_object_or_404(Comment, id=comment_id)
+        Bookmark.objects.filter(user=request.user, comment=comment).delete()
+        return JsonResponse({'success': True, 'action': 'unbookmarked', 'comment_id': comment.id})
+    return JsonResponse({'error': 'Invalid request method.'}, status=400)
+
+
+
+
+@login_required
 def post_creation(request):
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
@@ -383,13 +413,10 @@ def edit_post(request, post_id):
             messages.success(request, "Post updated successfully!")
             return redirect('post_detail', post_id=post.id)
         else:
-            # Debug için yalnızca POST isteğinde hata çıktısını yazdır
             print("DEBUG: Form errors:", form.errors)
     else:
-        # GET isteği için formu mevcut post verisiyle başlat
         form = PostForm(instance=post)
 
-    # Mevcut tagleri parçala ve liste olarak gönder
     existing_tags = post.tags.split(',') if post.tags else []
     return render(request, 'editPost.html', {'form': form, 'post': post, 'existing_tags': existing_tags})
 
@@ -496,6 +523,6 @@ def advanced_search(request):
         'posts': posts,
         'query': query,
         'sort_by': sort_by,
-        'method': 'advanced',  # Advanced search olduğunu belirtmek için
+        'method': 'advanced',
     })
 

@@ -79,3 +79,12 @@ class Vote(models.Model):
 
     class Meta:
         unique_together = ('user', 'post')  # Ensure a user can vote only once per post
+
+
+class Bookmark(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookmarked_comments')
+    comment = models.ForeignKey('Comment', on_delete=models.CASCADE, related_name='bookmarked_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'comment')

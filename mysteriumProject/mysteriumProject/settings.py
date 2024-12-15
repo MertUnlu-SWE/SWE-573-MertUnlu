@@ -27,8 +27,7 @@ SECRET_KEY = 'django-insecure-etebo%)_nxf1pozgvb1=1$)+5cr#hzb3*#lftdx&eg!%5__4si
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG =  os.getenv("IS_DEVELOPMENT", False)
 
-#ALLOWED_HOSTS = [os.getenv("localhost", "127.0.0.1")]
-#ALLOWED_HOSTS = ["13.53.116.156"]
+
 ALLOWED_HOSTS = [
     'mysterium.onrender.com',
     'mysterium-nginx-latest.onrender.com',
@@ -50,6 +49,9 @@ CSRF_TRUSTED_ORIGINS = [
     'https://www.mysterium.onrender.com',
     'https://swe-573-mertunlu.onrender.com',
     'http://localhost',
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000/'
 ]
 
 
@@ -102,8 +104,6 @@ WSGI_APPLICATION = 'mysteriumProject.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-#DATABASES = {'default': {'ENGINE': 'django.db.backends.postgresql','NAME': 'postgres','USER': 'mysteriumMert','PASSWORD': 'Mert539Unlu','HOST': 'mysterium-db.cj6g0u6gkb0e.eu-north-1.rds.amazonaws.com','PORT': '5432'}}
 load_dotenv()
 
 DATABASES = {
@@ -115,7 +115,7 @@ DATABASES = {
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT', '5432'),
         'OPTIONS': {
-            'sslmode': 'require',  # AWS RDS için SSL kullanımı
+            'sslmode': 'require',  # AWS RDS SSL Usage
         },
     }
 }
@@ -162,12 +162,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
+# Static Files Local
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
-#STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Özel statik dosyalar
 
 
-# Medya dosyaları
+# Media Files Local
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -179,8 +179,6 @@ AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
 STATICFILES_FOLDER = 'static'
 MEDIAFILES_FOLDER = 'media'
-#STATICFILES_STORAGE = 'custom_storages.StaticFilesStorage'
-#DEFAULT_FILE_STORAGE = 'custom_storages.MediaFilesStorage'
 
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
 
@@ -193,7 +191,6 @@ STORAGES = {
         "BACKEND": "custom_storages.StaticFilesStorage",
     }
 }
-#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 import mimetypes
 mimetypes.add_type("text/css", ".css", True)
