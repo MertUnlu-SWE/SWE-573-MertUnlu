@@ -9,6 +9,7 @@ from django.db.models import Count
 from .forms import PostForm, CommentForm
 from .wikidata_utils import fetch_wikidata_tags, fetch_wikidata_info
 from django.contrib import messages
+from django.db import transaction
 import boto3
 
 
@@ -274,20 +275,31 @@ def unmark_as_solved(request, post_id):
 
 
 @login_required
+@transaction.atomic
 def bookmark_comment(request, comment_id):
     if request.method == 'POST':
         comment = get_object_or_404(Comment, id=comment_id)
-        bookmark, created = Bookmark.objects.get_or_create(user=request.user, comment=comment)
 
-        if created:
-            return JsonResponse({'success': True, 'action': 'bookmarked', 'comment_id': comment.id})
-        return JsonResponse({'success': False, 'message': 'Already bookmarked.'})
+        # Check if already bookmarked
+        if Bookmark.objects.filter(user=request.user, comment=comment).exists():
+            return JsonResponse({'success': False, 'message': 'Already bookmarked.'})
+
+        # Create bookmark
+        Bookmark.objects.create(user=request.user, comment=comment)
+        return JsonResponse({'success': True, 'action': 'bookmarked', 'comment_id': comment.id})
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
 @login_required
+@transaction.atomic
 def unbookmark_comment(request, comment_id):
     if request.method == 'POST':
         comment = get_object_or_404(Comment, id=comment_id)
+
+        # Check if bookmark exists
+        if not Bookmark.objects.filter(user=request.user, comment=comment).exists():
+            return JsonResponse({'success': False, 'message': 'Not bookmarked.'})
+
+        # Delete bookmark
         Bookmark.objects.filter(user=request.user, comment=comment).delete()
         return JsonResponse({'success': True, 'action': 'unbookmarked', 'comment_id': comment.id})
     return JsonResponse({'error': 'Invalid request method.'}, status=400)

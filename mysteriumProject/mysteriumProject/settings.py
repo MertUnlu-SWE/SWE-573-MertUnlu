@@ -30,7 +30,6 @@ DEBUG =  os.getenv("IS_DEVELOPMENT", False)
 
 ALLOWED_HOSTS = [
     'mysterium.onrender.com',
-    'mysterium-nginx-latest.onrender.com',
     'www.mysterium.onrender.com',
     'swe-573-mertunlu.onrender.com',
     'django_app', 
@@ -50,7 +49,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://swe-573-mertunlu.onrender.com',
     'http://localhost',
     'http://127.0.0.1:8000',
-    'http://localhost:8000',
+    'http://localhost:8000/',
     'http://127.0.0.1:8000/'
 ]
 
@@ -58,14 +57,14 @@ CSRF_TRUSTED_ORIGINS = [
 # Application definition
 
 INSTALLED_APPS = [
-    'mysterium',
-    'storages',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles'
+    'django.contrib.staticfiles',
+    'mysterium',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -151,7 +150,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Istanbul'
 
 USE_I18N = True
 
@@ -163,8 +162,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 # Static Files Local
+# Static Files
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'static'
+
+# Statik dosyaların toplandığı hedef dizin (collectstatic ile)
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Kaynak statik dosyaların bulunduğu dizinler
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # Projenizin statik dosyaları buradadır
+]
 
 
 # Media Files Local
@@ -180,6 +187,7 @@ AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 STATICFILES_FOLDER = 'static'
 MEDIAFILES_FOLDER = 'media'
 
+STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
 
 

@@ -264,84 +264,53 @@
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    $(document).ready(function () {
+        const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+        let debounceTimer = null;
+
+        function debounce(func, delay) {
+            return function (...args) {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
     
-        // Handle Bookmark
-        document.querySelectorAll('.bookmark-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const commentId = button.dataset.commentId;
-    
-                fetch(`/comment/${commentId}/bookmark/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'Content-Type': 'application/json',
-                    },
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`Request failed: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            button.textContent = 'Unbookmark';
-                            button.classList.remove('btn-primary');
-                            button.classList.add('btn-danger');
-                            button.classList.remove('bookmark-btn');
-                            button.classList.add('unbookmark-btn');
-                            alert('Comment bookmarked successfully.');
-                            location.reload(); // Refresh page
-                        } else {
-                            alert(data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while bookmarking.');
-                    });
+        // Bookmark functionality
+        $(document).on('click', '.bookmark-btn', debounce(function () {
+            const button = $(this);
+            const commentId = button.data('comment-id');
+            $.ajax({
+                url: `/comment/${commentId}/bookmark/`,
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken },
+                success: function (data) {
+                    if (data.success) {
+                        button.text('Unbookmark')
+                              .removeClass('btn-primary bookmark-btn')
+                              .addClass('btn-danger unbookmark-btn');
+                    }
+                },
             });
-        });
-    
-        // Handle Unbookmark
-        document.querySelectorAll('.unbookmark-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const commentId = button.dataset.commentId;
-    
-                fetch(`/comment/${commentId}/unbookmark/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'Content-Type': 'application/json',
-                    },
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`Request failed: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            button.textContent = 'Bookmark';
-                            button.classList.remove('btn-danger');
-                            button.classList.add('btn-primary');
-                            button.classList.remove('unbookmark-btn');
-                            button.classList.add('bookmark-btn');
-                            alert('Comment unbookmarked successfully.');
-                            location.reload(); // Refresh page
-                        } else {
-                            alert(data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while unbookmarking.');
-                    });
+        }, 500));
+        
+        $(document).on('click', '.unbookmark-btn', debounce(function () {
+            const button = $(this);
+            const commentId = button.data('comment-id');
+            $.ajax({
+                url: `/comment/${commentId}/unbookmark/`,
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken },
+                success: function (data) {
+                    if (data.success) {
+                        button.text('Bookmark')
+                              .removeClass('btn-danger unbookmark-btn')
+                              .addClass('btn-primary bookmark-btn');
+                    }
+                },
             });
-        });
+        }, 500));
     });    
 </script>
+
 {% endblock %}
