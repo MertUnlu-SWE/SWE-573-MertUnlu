@@ -123,6 +123,18 @@ def post_detail(request, post_id):
     if request.method == 'POST' and not request.user.is_authenticated:
         return JsonResponse({'error': 'You must login to add a comment!'}, status=403)
     
+    # Volume hesaplama (width, height, length varsa hesaplanır)
+    volume = None
+    if post.width and post.height and post.length:
+        try:
+            width = float(post.width) if post.width_unit == 'cm' else float(post.width) * 100
+            height = float(post.height) if post.height_unit == 'cm' else float(post.height) * 100
+            length = float(post.length) if post.length_unit == 'cm' else float(post.length) * 100
+
+            volume = width * height * length
+        except (TypeError, ValueError):
+            volume = None
+    
 
     tags = []
     if post.tags:
@@ -164,6 +176,7 @@ def post_detail(request, post_id):
         'form': form,
         'tags': tags,
         'bookmarked_comment_ids': json.dumps(bookmarked_comment_ids),
+        'calculated_volume': volume,
     })
 
 @login_required
@@ -318,6 +331,7 @@ def unbookmark_comment(request, comment_id):
 
 
 @login_required
+@never_cache
 def post_creation(request):
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
@@ -332,6 +346,11 @@ def post_creation(request):
                     if value is not None:  # Only set fields with non-None values
                         setattr(post, field, value)
 
+                # Dinamik alanları formdan çek
+                unit_fields = ['width_unit', 'height_unit', 'length_unit', 'weight_unit', 'price_unit']
+                for unit_field in unit_fields:
+                    setattr(post, unit_field, form.cleaned_data.get(unit_field))
+                
                 # Process tags separately if needed
                 tags = form.cleaned_data.get('tags', '').strip()
                 post.tags = ', '.join(tag.strip() for tag in tags.split(','))
@@ -418,6 +437,13 @@ def edit_post(request, post_id):
             for field in form.cleaned_data:
                 if form.cleaned_data[field] is not None:
                     setattr(updated_post, field, form.cleaned_data[field])
+
+            # Dynamically update fields and units
+            updated_post.width_unit = form.cleaned_data.get('width_unit', post.width_unit)
+            updated_post.height_unit = form.cleaned_data.get('height_unit', post.height_unit)
+            updated_post.length_unit = form.cleaned_data.get('length_unit', post.length_unit)
+            updated_post.weight_unit = form.cleaned_data.get('weight_unit', post.weight_unit)
+            updated_post.price_unit = form.cleaned_data.get('price_unit', post.price_unit)
 
             # Handle image replacement logic
             if replace_image:

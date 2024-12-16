@@ -146,7 +146,16 @@ class AdvancedSearchForm(forms.Form):
     )
 
 
-
+# UNIT_CHOICES tanımı
+UNIT_CHOICES = [
+    ('cm', 'Centimeter'),
+    ('m', 'Meter'),
+    ('g', 'Gram'),
+    ('kg', 'Kilogram'),
+    ('USD', 'USD'),
+    ('EUR', 'Euro'),
+    ('TRY', 'TRY'),
+]
 
 class PostForm(forms.ModelForm):
     volume = forms.CharField(
@@ -154,20 +163,49 @@ class PostForm(forms.ModelForm):
     widget=forms.TextInput(attrs={'id': 'volume', 'placeholder': 'e.g., 500ml'})
     )
 
-    width = forms.CharField(
-        required=False, 
-        widget=forms.TextInput(attrs={'id': 'width', 'placeholder': 'e.g., 10cm'})
+    width = forms.DecimalField(
+        required=False,
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'id': 'width', 'placeholder': 'Width in cm'}),
+        error_messages={
+            'invalid': "Please enter a valid price in the format '123.45'."
+        }
     )
+    width_unit = forms.ChoiceField(choices=UNIT_CHOICES[:2], required=False, initial='cm')
 
-    height = forms.CharField(
-        required=False, 
-        widget=forms.TextInput(attrs={'id': 'height', 'placeholder': 'e.g., 15cm'})
+    height = forms.DecimalField(
+        required=False,
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'id': 'height', 'placeholder': 'Height in cm'}),
+        error_messages={
+            'invalid': "Please enter a valid price in the format '123.45'."
+        }
     )
+    height_unit = forms.ChoiceField(choices=UNIT_CHOICES[:2], required=False, initial='cm')
 
-    length = forms.CharField(
-        required=False, 
-        widget=forms.TextInput(attrs={'id': 'length', 'placeholder': 'e.g., 20cm'})
+    length = forms.DecimalField(
+        required=False,
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'id': 'length', 'placeholder': 'Length in cm'}),
+        error_messages={
+            'invalid': "Please enter a valid price in the format '123.45'."
+        }
     )
+    length_unit = forms.ChoiceField(choices=UNIT_CHOICES[:2], required=False, initial='cm')
+
+    weight = forms.DecimalField(
+        required=False,
+        max_digits=10,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={'id': 'weight', 'placeholder': 'Weight in kg or g'}),
+        error_messages={
+            'invalid': "Please enter a valid price in the format '123.45'."
+        }
+    )
+    weight_unit = forms.ChoiceField(choices=UNIT_CHOICES[2:4], required=False, initial='kg')
 
     price = forms.DecimalField(
         required=False, 
@@ -178,6 +216,7 @@ class PostForm(forms.ModelForm):
             'invalid': "Please enter a valid price in the format '123.45'."
         }
     )
+    price_unit = forms.ChoiceField(choices=UNIT_CHOICES[4:], required=False, initial='USD')
 
     shape = forms.CharField(
         required=False, 
@@ -246,10 +285,10 @@ class PostForm(forms.ModelForm):
         fields = [
             'title', 'description', 'object_image', 'material',
             'weight', 'condition', 'markings', 'historical_context',
-            'distinctive_features', 'volume', 'width', 'height', 'length',
+            'distinctive_features', 'volume', 'width', 'height', 'length', 
             'price', 'shape', 'physical_state', 'color', 'sound',
             'can_be_disassembled', 'taste', 'smell', 'functionality',
-            'location', 'tags'
+            'location', 'tags', 'width_unit', 'height_unit', 'length_unit', 'weight_unit', 'price_unit'
         ]
 
     def clean_object_image(self):

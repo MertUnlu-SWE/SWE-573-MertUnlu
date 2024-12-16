@@ -32,28 +32,40 @@
             </div>
 
             <!-- Descriptive Fields -->
-            <!-- Volume -->
-            <div class="mb-3">
-                <label for="volume" class="form-label">Volume</label>
-                <input type="text" name="volume" class="form-control" placeholder="e.g., 500ml">
-            </div>
-
             <!-- Width -->
             <div class="mb-3">
                 <label for="width" class="form-label">Width</label>
-                <input type="text" name="width" class="form-control" placeholder="e.g., 10cm">
+                <div class="d-flex">
+                    <input type="number" name="width" class="form-control" placeholder="e.g., 10">
+                    <select name="width_unit" class="form-select">
+                        <option value="cm" {% if post.width_unit == "cm" %}selected{% endif %}>cm</option>
+                        <option value="m" {% if post.width_unit == "m" %}selected{% endif %}>m</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Height -->
             <div class="mb-3">
                 <label for="height" class="form-label">Height</label>
-                <input type="text" name="height" class="form-control" placeholder="e.g., 15cm">
+                <div class="d-flex">
+                    <input type="number" name="height" class="form-control" placeholder="e.g., 15">
+                    <select name="height_unit" class="form-select">
+                        <option value="cm" {% if post.height_unit == "cm" %}selected{% endif %}>cm</option>
+                        <option value="m" {% if post.height_unit == "m" %}selected{% endif %}>m</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Length -->
             <div class="mb-3">
                 <label for="length" class="form-label">Length</label>
-                <input type="text" name="length" class="form-control" placeholder="e.g., 20cm">
+                <div class="d-flex">
+                    <input type="number" name="length" class="form-control" placeholder="e.g., 20">
+                    <select name="length_unit" class="form-select">
+                        <option value="cm" {% if post.length_unit == "cm" %}selected{% endif %}>cm</option>
+                        <option value="m" {% if post.length_unit == "m" %}selected{% endif %}>m</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Material -->
@@ -65,7 +77,13 @@
             <!-- Weight -->
             <div class="mb-3">
                 <label for="weight" class="form-label">Weight</label>
-                <input type="text" name="weight" class="form-control" placeholder="e.g., 500g">
+                <div class="d-flex">
+                    <input type="number" name="weight" class="form-control" placeholder="e.g., 200">
+                    <select name="weight_unit" class="form-select">
+                        <option value="g" {% if post.weight_unit == "g" %}selected{% endif %}>g</option>
+                        <option value="kg" {% if post.weight_unit == "kg" %}selected{% endif %}>kg</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Condition -->
@@ -77,8 +95,16 @@
             <!-- Price -->
             <div class="mb-3">
                 <label for="price" class="form-label">Price</label>
-                <input type="text" name="price" class="form-control" placeholder="e.g., 150.00">
+                <div class="d-flex">
+                    <input type="number" name="price" step="0.01" class="form-control" placeholder="e.g., 150.00" value="{{ post.price }}">
+                    <select name="price_unit" class="form-select">
+                        <option value="USD" {% if post.price_unit == "USD" %}selected{% endif %}>USD</option>
+                        <option value="EUR" {% if post.price_unit == "EUR" %}selected{% endif %}>EUR</option>
+                        <option value="TRY" {% if post.price_unit == "TRY" %}selected{% endif %}>TRY</option>
+                    </select>
+                </div>
             </div>
+            
 
             <!-- Shape -->
             <div class="mb-3">

@@ -38,12 +38,12 @@
 
                 <!-- Additional Descriptive Details -->
                 <div class="post-details">
-                    <p><strong>Volume:</strong> {{ post.volume }}</p>
-                    <p><strong>Width:</strong> {{ post.width }}</p>
-                    <p><strong>Height:</strong> {{ post.height }}</p>
-                    <p><strong>Length:</strong> {{ post.length }}</p>
-                    <p><strong>Weight:</strong> {{ post.weight }}</p>
-                    <p><strong>Price:</strong> {{ post.price }}</p>
+                    <p><strong>Volume:</strong> {{ calculated_volume }} cm³</p>
+                    <p><strong>Width:</strong> {{ post.width|floatformat:2 }} {{ post.width_unit }}</p>
+                    <p><strong>Height:</strong> {{ post.height|floatformat:2 }} {{ post.height_unit }}</p>
+                    <p><strong>Length:</strong> {{ post.length|floatformat:2 }} {{ post.length_unit }}</p>
+                    <p><strong>Weight:</strong> {{ post.weight|floatformat:2 }} {{ post.weight_unit }}</p>
+                    <p><strong>Price:</strong> {{ post.price|floatformat:2 }} {{ post.price_unit }}</p>
                     <p><strong>Shape:</strong> {{ post.shape }}</p>
                     <p><strong>Material:</strong> {{ post.material }}</p>
                     <p><strong>Physical State:</strong> {{ post.physical_state }}</p>

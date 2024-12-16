@@ -3,6 +3,16 @@ from django.conf import settings
 import boto3
 from django.contrib.auth.models import User
 
+UNIT_CHOICES = [
+    ('cm', 'Centimeter'),
+    ('m', 'Meter'),
+    ('g', 'Gram'),
+    ('kg', 'Kilogram'),
+    ('USD', 'USD'),
+    ('EUR', 'Euro'),
+    ('TRY', 'TRY'),
+]
+
 # Create your models here.
 class Post(models.Model):
     title = models.CharField(max_length=200)  # Title
@@ -17,10 +27,16 @@ class Post(models.Model):
     historical_context = models.TextField(blank=True, null=True)
     distinctive_features = models.TextField(blank=True, null=True)
     volume = models.CharField(max_length=50, blank=True, null=True)
-    width = models.CharField(max_length=50, blank=True, null=True)
-    height = models.CharField(max_length=50, blank=True, null=True)
-    length = models.CharField(max_length=50, blank=True, null=True)
+    width = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    width_unit = models.CharField(max_length=10, choices=UNIT_CHOICES, default='cm')
+    height = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    height_unit = models.CharField(max_length=10, choices=UNIT_CHOICES, default='cm')
+    length = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    length_unit = models.CharField(max_length=10, choices=UNIT_CHOICES, default='cm')
+    weight = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    weight_unit = models.CharField(max_length=10, choices=UNIT_CHOICES, default='g')
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    price_unit = models.CharField(max_length=10, choices=UNIT_CHOICES, default='USD')
     shape = models.CharField(max_length=100, blank=True, null=True)
     physical_state = models.CharField(max_length=100, blank=True, null=True)
     color = models.CharField(max_length=50, blank=True, null=True)
@@ -58,6 +74,7 @@ class Post(models.Model):
     def __str__(self):
         return self.title
     
+
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
