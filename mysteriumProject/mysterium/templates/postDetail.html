@@ -125,7 +125,7 @@
                         <small>{{ comment.created_at }}</small>
 
                         <!-- Bookmark Button -->
-                        {% if request.user.is_authenticated %}
+                        {% if request.user.is_authenticated and comment.user == request.user %}
                             <button 
                                 class="btn btn-sm {% if comment.id in bookmarked_comment_ids %}btn-danger{% else %}btn-primary{% endif %} bookmark-toggle-btn" 
                                 data-comment-id="{{ comment.id }}">
@@ -265,6 +265,27 @@
         {% endfor %}
     });
     
+</script>
+
+<script>
+    $(document).ready(function () {
+        // Backend'den JSON formatında gelen veri
+        const bookmarkedCommentIds = {{ bookmarked_comment_ids|safe }};
+    
+        //console.log("Comment ID's: ", bookmarkedCommentIds);
+        // Tüm bookmark butonlarını kontrol et
+        $('.bookmark-toggle-btn').each(function () {
+            const button = $(this);
+            const commentId = parseInt(button.data('comment-id'), 10);
+            // Eğer comment ID backend'deki listede varsa durumu değiştir
+            if (bookmarkedCommentIds.includes(commentId)) {
+                //console.log("Bookmarked Comment ID: ", commentId);
+                button.removeClass('btn-primary').addClass('btn-danger').text('Unbookmark');
+            } else {
+                button.removeClass('btn-danger').addClass('btn-primary').text('Bookmark');
+            }
+        });
+    });    
 </script>
 
 <script>

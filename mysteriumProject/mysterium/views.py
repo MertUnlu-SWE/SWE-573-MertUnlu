@@ -11,6 +11,8 @@ from .wikidata_utils import fetch_wikidata_tags, fetch_wikidata_info
 from django.contrib import messages
 from django.db import transaction
 import boto3
+import json
+from django.views.decorators.cache import never_cache
 
 
 # Create your views here.
@@ -72,6 +74,7 @@ def login_view(request):
 
 
 @login_required
+@never_cache
 def profile_view(request):
     user_posts = Post.objects.filter(user=request.user).order_by('-created_at')
     bookmarked_comments = Bookmark.objects.filter(user=request.user).select_related('comment__post')
@@ -98,6 +101,7 @@ def logout_view(request):
     messages.success(request, 'Successfully logged out.')
     return redirect('index')
 
+@never_cache
 def index(request):
     try:
         posts = Post.objects.all().order_by('-upvotes')  # Ensure no database issues
@@ -105,7 +109,7 @@ def index(request):
     except Exception as e:
         return JsonResponse({'error': f"Index view error: {str(e)}"}, status=500)
 
-
+@never_cache
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     comments = Comment.objects.filter(post=post).order_by('-created_at')
@@ -140,19 +144,21 @@ def post_detail(request, post_id):
     else:
         form = CommentForm()
 
+    print("Post Details openned!")
     # Login Check
     if request.user.is_authenticated:
         bookmarks = Bookmark.objects.filter(user=request.user, comment__in=comments)
-        bookmarked_comment_ids = set(bookmarks.values_list('comment_id', flat=True))
+        bookmarked_comment_ids = list(bookmarks.values_list('comment_id', flat=True))  # Liste formatı
+        print("Bookmarked Comment IDs:", bookmarked_comment_ids)
     else:
-        bookmarked_comment_ids = set()  # Anonymus Users
+        bookmarked_comment_ids = []
 
     return render(request, 'postDetail.html', {
         'post': post,
         'comments': comments,
         'form': form,
         'tags': tags,
-        'bookmarked_comment_ids': bookmarked_comment_ids,
+        'bookmarked_comment_ids': json.dumps(bookmarked_comment_ids),
     })
 
 @login_required

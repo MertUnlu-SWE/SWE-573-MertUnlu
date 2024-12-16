@@ -10,8 +10,8 @@ $(document).ready(function () {
         // URL'yi belirle
         const isUnsolved = button.text().trim() === 'Mark as Unsolved';
         const url = isUnsolved
-            ? `/post/${postId}/unmark_as_solved/`
-            : `/post/${postId}/mark_as_solved/comment/${commentId}/`;
+            ? `/post/${postId}/unmark_as_solved/?_=${new Date().getTime()}`
+            : `/post/${postId}/mark_as_solved/comment/${commentId}/?_=${new Date().getTime()}`;
 
         // AJAX isteği gönder
         $.ajax({

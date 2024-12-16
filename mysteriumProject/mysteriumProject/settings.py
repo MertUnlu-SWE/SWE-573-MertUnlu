@@ -173,10 +173,21 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",  # Projenizin statik dosyaları buradadır
 ]
 
-
 # Media Files Local
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+STATICFILES_FOLDER = 'static'
+MEDIAFILES_FOLDER = 'media'
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "custom_storages.StaticFilesStorage",
+    },
+    "default": {
+        "BACKEND": "custom_storages.MediaFilesStorage",
+    }
+}
 
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
@@ -184,21 +195,9 @@ AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
-STATICFILES_FOLDER = 'static'
-MEDIAFILES_FOLDER = 'media'
 
 STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-
-
-STORAGES = {
-    "default": {
-        "BACKEND": "custom_storages.MediaFilesStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "custom_storages.StaticFilesStorage",
-    }
-}
 
 import mimetypes
 mimetypes.add_type("text/css", ".css", True)
