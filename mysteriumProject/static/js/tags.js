@@ -1,31 +1,29 @@
 document.addEventListener('DOMContentLoaded', function () {
     const searchTagBtn = document.getElementById('searchTagBtn');
-    const tagInput = document.querySelector('#tags');
+    const tagInput = document.getElementById('tags');
     const tagsContainer = document.getElementById('added-tags');
-    const searchResultsContainer = document.getElementById('search-results'); // Eksik tanım eklendi
-    const existingTagsContainer = document.getElementById('existing-tags');
+    const searchResultsContainer = document.getElementById('search-results');
     let tags = new Set();
 
-    // Open Modal and Fetch Results
+    // Tag Arama
     searchTagBtn.addEventListener('click', function () {
-        const tagQuery = tagInput.value.trim();
-        if (tagQuery) {
-            fetch(`/fetch_wikidata/?tags=${encodeURIComponent(tagQuery)}`)
+        const query = tagInput.value.trim();
+        if (query) {
+            fetch(`/fetch_wikidata/?tags=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
-                    searchResultsContainer.innerHTML = ''; // Clear old results
-                    if (data.results && data.results[tagQuery]) {
-                        const tags = data.results[tagQuery];
-                        tags.forEach(tag => {
+                    searchResultsContainer.innerHTML = ''; // Önceki sonuçları temizle
+                    if (data.results && Object.keys(data.results).length > 0) {
+                        for (const tag of Object.values(data.results)[0]) {
                             const li = document.createElement('li');
                             li.className = 'list-group-item';
                             li.innerHTML = `<strong>${tag.label} (${tag.qNumber})</strong><br>${tag.description || 'No description available.'}`;
                             li.addEventListener('click', function () {
                                 addTag(tag.label, tag.qNumber);
-                                $('#tagSearchModal').modal('hide'); // Hide modal
+                                $('#tagSearchModal').modal('hide');
                             });
                             searchResultsContainer.appendChild(li);
-                        });
+                        }
                     } else {
                         searchResultsContainer.innerHTML = '<li class="list-group-item">No results found.</li>';
                     }
@@ -33,57 +31,33 @@ document.addEventListener('DOMContentLoaded', function () {
                 .catch(() => {
                     searchResultsContainer.innerHTML = '<li class="list-group-item">Error fetching data. Try again later.</li>';
                 });
-            $('#tagSearchModal').modal('show'); // Show modal
+            $('#tagSearchModal').modal('show'); // Modal'ı göster
         }
     });
 
-    // Add Tag to Input
-    function addTag(tagLabel, qNumber = null) {
-        const formattedTag = qNumber ? `${tagLabel} (${qNumber})` : tagLabel;
-
-        if (!isDuplicate(formattedTag)) {
+    // Tag Ekleme
+    function addTag(label, qNumber) {
+        const formattedTag = `${label} (${qNumber.startsWith('Q') ? qNumber : 'Q' + qNumber})`;
+        if (!tags.has(formattedTag)) {
             tags.add(formattedTag);
-
-            // Yeni Tag için HTML Elementi Oluştur
             const tagElement = document.createElement('div');
-            tagElement.classList.add('tag');
+            tagElement.className = 'tag';
             tagElement.innerHTML = `
-                ${formattedTag} <button type="button" class="remove-tag">&times;</button>
+                ${formattedTag} 
+                <button type="button" class="btn btn-sm btn-danger ms-2 remove-tag">&times;</button>
             `;
-
-            // Silme Butonuna Event Listener Ekle
             tagElement.querySelector('.remove-tag').addEventListener('click', function () {
                 tags.delete(formattedTag);
                 tagElement.remove();
                 updateInputValue();
             });
-
-            // Tag'i Görüntüleme Alanına Ekle
             tagsContainer.appendChild(tagElement);
             updateInputValue();
         }
     }
 
-    // Taglerin Input Alanına Güncellenmesi
+    // Tagleri Input Alanına Yaz
     function updateInputValue() {
         tagInput.value = Array.from(tags).join(', ');
     }
-
-    // Duplicate Kontrolü
-    function isDuplicate(tag) {
-        return Array.from(tags).some(existingTag => existingTag.toLowerCase() === tag.toLowerCase());
-    }
-
-    // Mevcut tagleri input alanına ekle
-    function updateInput() {
-        const tags = Array.from(existingTagsContainer.children).map(tag => tag.querySelector('span').textContent.trim());
-        tagInput.value = tags.join(', ');
-    }
-
-    existingTagsContainer.addEventListener('click', function (e) {
-        if (e.target.classList.contains('remove-tag')) {
-            e.target.parentElement.remove();
-            updateInput();
-        }
-    });
 });

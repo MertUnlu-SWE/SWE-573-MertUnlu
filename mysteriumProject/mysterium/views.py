@@ -341,6 +341,10 @@ def post_creation(request):
                 post.user = request.user
                 request.session['unsaved_post'] = form.cleaned_data
 
+                # Tags işlemi
+                new_tags = form.cleaned_data.get('tags', '').strip()
+                post.tags = ', '.join([tag.strip() for tag in new_tags.split(',') if tag.strip()])
+
                 # Dynamically handle all fields in form.cleaned_data
                 for field, value in form.cleaned_data.items():
                     if value is not None:  # Only set fields with non-None values
@@ -351,9 +355,6 @@ def post_creation(request):
                 for unit_field in unit_fields:
                     setattr(post, unit_field, form.cleaned_data.get(unit_field))
                 
-                # Process tags separately if needed
-                tags = form.cleaned_data.get('tags', '').strip()
-                post.tags = ', '.join(tag.strip() for tag in tags.split(','))
 
                 if 'object_image' in request.FILES:
                     print("Object Image Detected in Request Files")  # Debugging Log
@@ -365,6 +366,7 @@ def post_creation(request):
 
                 post.save()
                 print(f"Image uploaded to: {post.object_image.url}")
+                print(f"Tags: {post.tags}")
                 del request.session['unsaved_post']  # Clear session if successfully saved
                 messages.success(request, "Post created successfully!")
                 return redirect('post_detail', post_id=post.id)
@@ -397,24 +399,16 @@ def fetch_wikidata(request):
         
         all_results = {}
         for tag in tags:
-            try:
-                results = fetch_wikidata_tags(tag)
-                if results:
-                    all_results[tag] = [
-                        {
-                            'qNumber': res[0].split('/')[-1],
-                            'label': res[1],
-                            'description': res[2]  # Açıklama ekleniyor
-                        } for res in results
-                    ]
-                else:
-                    all_results[tag] = []
-            except Exception as e:
-                all_results[tag] = f"Error fetching data for tag '{tag}': {str(e)}"
-        
+            results = fetch_wikidata_tags(tag)
+            if results:
+                all_results[tag] = [
+                    {'qNumber': res[0].split('/')[-1].lstrip('Q'), 'label': res[1], 'description': res[2]}
+                    for res in results
+                ]
         return JsonResponse({'results': all_results})
     except Exception as e:
-        return JsonResponse({'error': f"Failed to fetch Wikidata information: {str(e)}"}, status=500)
+        return JsonResponse({'error': f"Error: {str(e)}"}, status=500)
+
 
 
 
@@ -437,6 +431,10 @@ def edit_post(request, post_id):
             for field in form.cleaned_data:
                 if form.cleaned_data[field] is not None:
                     setattr(updated_post, field, form.cleaned_data[field])
+
+            # Tags işlemi
+            new_tags = form.cleaned_data.get('tags', '').strip()
+            updated_post.tags = ', '.join([tag.strip() for tag in new_tags.split(',') if tag.strip()])
 
             # Dynamically update fields and units
             updated_post.width_unit = form.cleaned_data.get('width_unit', post.width_unit)
