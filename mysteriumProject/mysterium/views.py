@@ -4,7 +4,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse
-from .models import Post, Comment, Bookmark
+from .models import Post, Comment, Bookmark, CommentVote
 from django.db.models import Count
 from .forms import PostForm, CommentForm
 from .wikidata_utils import fetch_wikidata_tags, fetch_wikidata_info
@@ -225,26 +225,42 @@ def vote_post(request, post_id, vote_type):
 
 @login_required
 def vote_comment(request, comment_id, vote_type):
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'You must login before commenting!'}, status=403)
+    comment = get_object_or_404(Comment, id=comment_id)
 
-    comment = Comment.objects.get(id=comment_id)
-    
-    # Check if the user has already voted
-    if request.user in comment.voted_users.all():
-        return JsonResponse({'error': 'You have already voted on this comment.'}, status=403)
-    
-    # Increment the upvote or downvote count
-    if vote_type == 'upvote':
-        comment.upvotes += 1
-    elif vote_type == 'downvote':
-        comment.downvotes += 1
+    # Kullanıcının mevcut oyunu kontrol et
+    existing_vote = CommentVote.objects.filter(comment=comment, user=request.user).first()
+
+    if existing_vote:
+        if existing_vote.vote_type == vote_type:
+            # Aynı oy tekrar yapıldıysa, oyu geri çek
+            existing_vote.delete()
+            if vote_type == 'upvote':
+                comment.upvotes -= 1
+            elif vote_type == 'downvote':
+                comment.downvotes -= 1
+        else:
+            # Oy türünü değiştir
+            if vote_type == 'upvote':
+                comment.upvotes += 1
+                comment.downvotes -= 1
+            elif vote_type == 'downvote':
+                comment.downvotes += 1
+                comment.upvotes -= 1
+            existing_vote.vote_type = vote_type
+            existing_vote.save()
+    else:
+        # Yeni oy ekle
+        if vote_type == 'upvote':
+            comment.upvotes += 1
+        elif vote_type == 'downvote':
+            comment.downvotes += 1
+        CommentVote.objects.create(comment=comment, user=request.user, vote_type=vote_type)
+
     comment.save()
-    
-    # Add the user to the voted_users field to track that they have voted
-    comment.voted_users.add(request.user)
-    
     return JsonResponse({'upvotes': comment.upvotes, 'downvotes': comment.downvotes})
+
+
+
 
 @login_required
 def mark_as_solved(request, post_id, comment_id):

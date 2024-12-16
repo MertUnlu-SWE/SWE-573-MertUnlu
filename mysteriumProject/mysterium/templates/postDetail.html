@@ -181,8 +181,12 @@
 <script src="{% static 'js/comments.js' %}"></script>
 
 <script>
+    function getCSRFToken() {
+        return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    }
     $(document).ready(function() {
         console.log("Document is ready");
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
 
         $('form').submit(function (e) {
             if (!{{ user.is_authenticated|yesno:"true,false" }}) {
@@ -233,15 +237,19 @@
         {% for comment in comments %}
         $('#upvote-btn-{{ comment.id }}').click(function() {
             $.ajax({
-                url: '/comment/{{ comment.id }}/upvote/?_=${new Date().getTime()}', // Cache busting
+                url: '/comment/{{ comment.id }}/upvote/',
                 method: 'POST',
-                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                headers: {
+                    'X-CSRFToken': getCSRFToken()  // CSRF Token ekleniyor
+                },
                 success: function(data) {
+                    console.log('Upvote successful:', data);
                     $('#upvote-count-{{ comment.id }}').text(data.upvotes);
                 },
                 error: function(xhr) {
+                    console.error('Error:', xhr);
                     if (xhr.status === 403) {
-                        alert('You must login to perform this action!');
+                        alert('403 Error: CSRF token validation failed or you must log in.');
                     } else {
                         alert('An error occurred. Please try again.');
                     }
@@ -250,16 +258,22 @@
         });
     
         $('#downvote-btn-{{ comment.id }}').click(function() {
+            if (!{{ user.is_authenticated|yesno:"true,false" }}) {
+                alert('You must login to downvote a comment!');
+                return;
+            }
             $.ajax({
-                url: '/comment/{{ comment.id }}/downvote/?_=${new Date().getTime()}',
+                url: '/comment/{{ comment.id }}/downvote/',
                 method: 'POST',
-                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                headers: { 'X-CSRFToken': getCSRFToken() },
                 success: function(data) {
+                    console.log('Downvote successful:', data);
                     $('#downvote-count-{{ comment.id }}').text(data.downvotes);
                 },
                 error: function(xhr) {
+                    console.error('Error:', xhr);
                     if (xhr.status === 403) {
-                        alert('You must login to perform this action!');
+                        alert('403 Error: CSRF token validation failed or you must log in.');
                     } else {
                         alert('An error occurred. Please try again.');
                     }

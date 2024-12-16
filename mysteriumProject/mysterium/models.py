@@ -96,6 +96,17 @@ class Vote(models.Model):
         unique_together = ('user', 'post')  # Ensure a user can vote only once per post
 
 
+class CommentVote(models.Model):
+    VOTE_TYPES = [('upvote', 'Upvote'), ('downvote', 'Downvote')]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comment_votes')
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='votes')
+    vote_type = models.CharField(max_length=10, choices=VOTE_TYPES)
+
+    class Meta:
+        unique_together = ('user', 'comment')  # Ensure a user can vote only once per comment
+
+
 class Bookmark(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookmarked_comments')
     comment = models.ForeignKey('Comment', on_delete=models.CASCADE, related_name='bookmarked_by')
