@@ -25,8 +25,12 @@
                     <a href="{% url 'user_profile' post.user.id %}" class="fw-bold text-decoration-none">{{ post.user.username }}</a>
                 </div>                
                 <div class="post-image mb-4">
-                    <img src="{{ post.object_image.url }}" alt="Post Image" class="img-fluid w-100 rounded"
-                        style="max-width: 400px; height: auto;">
+                    {% if post.object_image %}
+                        <img src="{{ post.object_image.url }}" alt="Post Image" class="img-fluid w-100 rounded"
+                            style="max-width: 400px; height: auto;">
+                    {% else %}
+                        <p class="text-muted">No image available for this post.</p>
+                    {% endif %}
                 </div>
                 <div class="post-description p-3 bg-light rounded mb-4">
                     <p class="mb-0">{{ post.description }}</p>

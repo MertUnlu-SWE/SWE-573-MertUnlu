@@ -394,43 +394,42 @@ def fetch_wikidata(request):
 
 
 
-
 @login_required
+@never_cache
 def edit_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
-    # Ensure only the owner of the post can edit it
     if request.user != post.user:
         messages.error(request, "You are not authorized to edit this post.")
         return redirect('post_detail', post_id=post.id)
 
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES, instance=post)
+        replace_image = request.POST.get('replace_image') == 'true'
         if form.is_valid():
             updated_post = form.save(commit=False)
 
-            # Handle image replacement
-            if 'object_image' in request.FILES:
-                if post.object_image:  # Delete the old image from S3
-                    s3 = boto3.client('s3')
-                    bucket_name = 'mysterium-media'
-                    try:
-                        s3.delete_object(Bucket=bucket_name, Key=str(post.object_image))
-                    except Exception as e:
-                        print(f"Failed to delete old image: {e}")
-
-            updated_post.object_image = request.FILES['object_image']
-
-            # Update only provided fields, keep others unchanged
+            # Mevcut ve değiştirilen alanları güncelle
             for field in form.cleaned_data:
                 if form.cleaned_data[field] is not None:
                     setattr(updated_post, field, form.cleaned_data[field])
+
+            # Handle image replacement logic
+            if replace_image:
+                if post.object_image:
+                    try:
+                        post.object_image.open()
+                        post.object_image.delete(save=False)
+                        post.object_image.close()
+                    except Exception as e:
+                        messages.error(request, f"Error deleting image: {str(e)}")
+                updated_post.object_image = request.FILES.get('object_image')
 
             updated_post.save()
             messages.success(request, "Post updated successfully!")
             return redirect('post_detail', post_id=post.id)
         else:
-            print("DEBUG: Form errors:", form.errors)
+            messages.error(request, "Form validation failed.")
     else:
         form = PostForm(instance=post)
 

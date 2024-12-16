@@ -155,9 +155,18 @@
 
             <!-- Image Upload -->
             <div class="image-upload mb-3">
-                {{ form.object_image.label_tag }}
+                <label for="id_object_image">Object Image:</label>
                 {{ form.object_image }}
+            
+                {% if post.object_image %}
+                    <div class="mb-2">
+                        <img src="{{ post.object_image.url }}" alt="Current Image" class="img-thumbnail">
+                        <button type="button" class="btn btn-danger" id="replace-image-btn">Replace Image</button>
+                    </div>
+                {% endif %}
+                <input type="file" name="object_image" id="id_object_image" class="form-control mt-2" style="display: none;">
             </div>
+            
 
             <!-- Tag Input -->
             <div class="mb-3">
@@ -213,16 +222,27 @@
 <script src="{% static 'js/tags.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Mevcut bir resim yoksa ve yeni bir dosya yüklenmediyse uyarı ver
+        const hasExistingImage = {{ post.object_image|yesno:"true,false" }}; // Güvenli kontrol
         const form = document.querySelector('form');
+        const objectImageInput = document.getElementById('id_object_image');
+        const clearCheckbox = document.getElementById('object_image-clear_id'); // Clear kutucuğu
+
         form.addEventListener('submit', function (e) {
-            const objectImageInput = document.getElementById('id_object_image');
-            if (!objectImageInput.files.length) {
+            if (!hasExistingImage && !objectImageInput.files.length) {
                 e.preventDefault();
                 alert('You must upload an image before submitting the post.');
+            }
+
+            // Eğer Clear kutusu işaretliyse ve dosya seçilmişse uyarı ver
+            if (clearCheckbox && clearCheckbox.checked && objectImageInput.files.length) {
+                e.preventDefault();
+                alert('You cannot clear the existing image and upload a new one at the same time.');
             }
         });
     });
 </script>
+
 <script>
     function removeTag(element, tag) {
         const input = document.getElementById('tags');
@@ -232,4 +252,15 @@
         element.parentElement.remove();
     }
 </script>
+
+<script>
+    document.getElementById('replace-image-btn').addEventListener('click', function() {
+        if (confirm('Are you sure you want to delete the current image and upload a new one?')) {
+            const inputField = document.getElementById('id_object_image');
+            inputField.style.display = 'block'; // Show file input
+            document.querySelector('[name="replace_image"]').value = 'true';
+        }
+    });
+</script>
+<input type="hidden" name="replace_image" value="false">
 {% endblock %}

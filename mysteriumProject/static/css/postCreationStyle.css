@@ -62,8 +62,10 @@ h2 {
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
+
 .image-upload {
     display: flex;
+    flex-direction: column; /* İçerikleri dikey hizala */
     justify-content: center;
     align-items: center;
     border: 2px dashed #ccc;
@@ -72,6 +74,19 @@ h2 {
     border-radius: 8px;
     background-color: #f9f9f9;
 }
+
+.image-upload label {
+    font-weight: bold;
+    margin-bottom: 10px; /* Label ve input arasına boşluk ekle */
+    text-align: center;
+}
+
+.image-upload input[type="file"] {
+    display: block; /* Input'u düzgün göster */
+    width: auto;
+    margin-top: 10px; /* Boşluk ekle */
+}
+
 
 input[type="text"], textarea, input[type="file"] {
     width: 100%;

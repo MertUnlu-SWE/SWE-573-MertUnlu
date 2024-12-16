@@ -253,10 +253,24 @@ class PostForm(forms.ModelForm):
         ]
 
     def clean_object_image(self):
+        replace_image = self.data.get('replace_image', 'false') == 'true'
         object_image = self.cleaned_data.get('object_image')
-        if not object_image:
-            raise forms.ValidationError("An image is required for the post.")
+
+        if replace_image and self.instance.object_image:
+            try:
+                self.instance.object_image.open()
+                self.instance.object_image.delete(save=False)
+                self.instance.object_image.close()
+            except Exception as e:
+                raise forms.ValidationError(f"Error deleting the image: {str(e)}")
+
+        if not object_image and not replace_image and self.instance.object_image:
+            return self.instance.object_image
+
         return object_image
+
+
+
 
     def clean_tags(self):
         tags = self.cleaned_data.get('tags', '')
