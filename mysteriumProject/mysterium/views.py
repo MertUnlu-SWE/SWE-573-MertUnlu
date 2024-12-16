@@ -73,26 +73,31 @@ def login_view(request):
     return render(request, 'login.html', {'next': next_url})
 
 
-@login_required
+
 @never_cache
-def profile_view(request):
-    user_posts = Post.objects.filter(user=request.user).order_by('-created_at')
-    bookmarked_comments = Bookmark.objects.filter(user=request.user).select_related('comment__post')
+def profile_view(request, user_id=None):
+    if user_id:
+        profile_user = get_object_or_404(User, id=user_id)
+        is_own_profile = request.user.is_authenticated and profile_user == request.user
+    else:
+        if not request.user.is_authenticated:
+            messages.error(request, "You must log in to view your profile.")
+            return redirect('login')
+        profile_user = request.user
+        is_own_profile = True
+
+    user_posts = Post.objects.filter(user=profile_user).order_by('-created_at')
+    bookmarked_comments = (
+        Bookmark.objects.filter(user=request.user).select_related('comment__post') if is_own_profile else None
+    )
+
     return render(request, 'profile.html', {
-        'user': request.user,
+        'profile_user': profile_user,
+        'is_own_profile': is_own_profile,
         'user_posts': user_posts,
         'bookmarked_comments': bookmarked_comments,
     })
 
-
-def user_profile(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    user_posts = Post.objects.filter(user=user).order_by('-created_at')
-    return render(request, 'profile.html', {
-        'user': user,
-        'user_posts': user_posts,
-        'is_own_profile': request.user == user
-    })
 
 
 
@@ -409,7 +414,7 @@ def edit_post(request, post_id):
         if form.is_valid():
             updated_post = form.save(commit=False)
 
-            # Mevcut ve değiştirilen alanları güncelle
+            # Update current and changed fields
             for field in form.cleaned_data:
                 if form.cleaned_data[field] is not None:
                     setattr(updated_post, field, form.cleaned_data[field])

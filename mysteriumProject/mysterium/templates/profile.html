@@ -1,15 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-5">
-    <h2>{{ is_own_profile|yesno:"Your Profile,Profile of " }}{{ user.username }}</h2>
-    <p>First Name: {{ user.first_name }}</p>
-    <p>Last Name: {{ user.last_name }}</p>
-    {% if is_own_profile %}
-        <p>First Name: {{ user.first_name }}</p>
-        <p>Last Name: {{ user.last_name }}</p>
-    {% endif %}
+    <h2>{{ is_own_profile|yesno:"Your Profile ,Profile of " }}{{ profile_user.username }}</h2>
+    <p>First Name: {{ profile_user.first_name }}</p>
+    <p>Last Name: {{ profile_user.last_name }}</p>
 
-    <h2>{{ is_own_profile|yesno:"Your Posts,Posts by " }}{{ user.username }}</h2>
+    <h2>{{ is_own_profile|yesno:"Your Posts ,Posts by " }}{{ profile_user.username }}</h2>
     <div class="row">
         {% for post in user_posts %}
             <div class="col-md-4">
@@ -21,19 +17,18 @@
                         <h5 class="card-title">{{ post.title }}</h5>
                         <p class="card-text">{{ post.description|truncatewords:15 }}</p>
                         <p>Status: 
-                            <span class="{% if post.is_solved %}solved{% else %}unsolved{% endif %}">
-                                {% if post.is_solved %}Solved{% else %}Unsolved{% endif %}
-                            </span>
+                            <span class="{% if post.is_solved %}solved{% else %}unsolved{% endif %}">{{ post.is_solved|yesno:"Solved,Unsolved" }}</span>
                         </p>
                         <a href="{% url 'post_detail' post.id %}" class="btn btn-primary">View Post</a>
                     </div>
                 </div>
             </div>
         {% empty %}
-            <p>{{ user.username }} has not created any posts yet.</p>
+            <p>{{ profile_user.username }} has not created any posts yet.</p>
         {% endfor %}
     </div>
 
+    {% if is_own_profile %}
     <h2>Your Bookmarked Comments</h2>
     <div class="bookmarked-comments">
         {% for bookmark in bookmarked_comments %}
@@ -45,6 +40,6 @@
             <p>You have no bookmarked comments.</p>
         {% endfor %}
     </div>
-
+    {% endif %}
 </div>
 {% endblock %}
