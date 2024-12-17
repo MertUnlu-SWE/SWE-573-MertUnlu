@@ -1,4 +1,6 @@
 # SWE-573: Mert Unlu's Mysterium Project
+## Deployed Project Link
+https://mysterium.onrender.com
 
 ## Project Overview
 
@@ -53,3 +55,6 @@ This repository is part of the SWE 573 course and serves as a comprehensive expl
 - **Clean Git History:** Organized commits and detailed commit messages for transparency.
 - **Issues and Labels:** Structured task management for better tracking and collaboration.
 - **Documentation:** Thorough explanations for each step of the project.
+
+## Quick Access
+For the wiki page, you can visit [here](https://github.com/MertUnlu-SWE/SWE-573-MertUnlu/wiki).
