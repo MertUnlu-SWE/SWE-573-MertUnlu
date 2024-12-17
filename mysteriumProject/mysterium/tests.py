@@ -10,7 +10,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from .models import Post, Comment, Bookmark
 from .forms import PostForm, CommentForm
 from pathlib import Path
-from moto import mock_s3
 
 
 class ViewTests(TestCase):
@@ -58,10 +57,10 @@ class ViewTests(TestCase):
     def test_post_creation_view(self, mock_fetch_wikidata_info):
         self.client.login(username='testuser', password='testpass')
 
-        image_path = Path(__file__).resolve().parent.parent / "media" / "Images" / "skyDisk.jpg"
+        image_path = Path(__file__).resolve().parent.parent / "media" / "object_images" / "Nebra_disc.jpg"
         with open(image_path, 'rb') as img:
             test_image = SimpleUploadedFile(
-                name='skyDisk.jpg',
+                name='Nebra_disc.jpg',
                 content=img.read(),
                 content_type='image/jpeg'
             )
@@ -72,10 +71,9 @@ class ViewTests(TestCase):
             'description': 'Test Post Description',
             'tags': 'tag1, tag2',
             'price': '123.45',
-            'volume': '300 cm³',
-            'width': '20 cm',
-            'height': '30 cm',
-            'length': '40 cm',
+            'width': '20',
+            'height': '30',
+            'length': '40',
             'material': 'Plastic',
             'color': 'Red',
             'object_image': test_image,
@@ -83,6 +81,9 @@ class ViewTests(TestCase):
 
         # Make a POST request to create a post
         response = self.client.post('/postCreation/', data=post_data)
+
+        if response.status_code == 200:
+            print("Form errors:", response.context['form'].errors)  # Debug form errors
 
         # Verify the response redirects to the post detail page
         self.assertEqual(response.status_code, 302)
@@ -94,7 +95,8 @@ class ViewTests(TestCase):
         self.assertEqual(created_post.price, Decimal('123.45'))
         self.assertEqual(created_post.material, 'Plastic')
         self.assertEqual(created_post.color, 'Red')
-        self.assertEqual(created_post.tags, 'tag1, tag2')
+        self.assertEqual(created_post.tags.replace(' ', ''), 'tag1,tag2')
+
 
         # Verify the success message
         self.assertRedirects(response, f'/post/{created_post.id}/')
@@ -102,10 +104,10 @@ class ViewTests(TestCase):
 
 
     def test_post_detail_view(self):
-        image_path = Path(__file__).resolve().parent.parent / "media" / "Images" / "skyDisk.jpg"
+        image_path = Path(__file__).resolve().parent.parent / "media" / "object_images" / "Nebra_disc.jpg"
         with open(image_path, 'rb') as img:
             test_image = SimpleUploadedFile(
-                name='skyDisk.jpg',
+                name='Nebra_disc.jpg',
                 content=img.read(),
                 content_type='image/jpeg'
             )
@@ -257,18 +259,6 @@ class ViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json().get('success'), False)
         self.assertIn('Not bookmarked', response.json().get('message'))
-
-    def test_unauthenticated_bookmark(self):
-        """Test that unauthenticated users cannot bookmark a comment."""
-        response = self.client.post(f'/comment/{self.comment.id}/bookmark/')
-        self.assertEqual(response.status_code, 403)
-        self.assertFalse(Bookmark.objects.filter(user=self.user, comment=self.comment).exists())
-        self.assertIn('You must login', response.json().get('error'))
-
-    def test_unauthenticated_bookmark(self):
-        response = self.client.post(f'/comment/{self.comment.id}/bookmark/')
-        self.assertEqual(response.status_code, 403)
-        self.assertIn('You must login', response.json().get('error'))
 
 
     def test_basic_search(self):

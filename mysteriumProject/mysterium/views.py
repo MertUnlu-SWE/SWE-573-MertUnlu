@@ -9,7 +9,6 @@ from django.db.models import Count
 from .forms import PostForm, CommentForm
 from .wikidata_utils import fetch_wikidata_tags, fetch_wikidata_info
 from django.contrib import messages
-from django.db import transaction
 import boto3
 import json
 from django.views.decorators.cache import never_cache
@@ -226,20 +225,16 @@ def vote_post(request, post_id, vote_type):
 @login_required
 def vote_comment(request, comment_id, vote_type):
     comment = get_object_or_404(Comment, id=comment_id)
-
-    # Kullanıcının mevcut oyunu kontrol et
     existing_vote = CommentVote.objects.filter(comment=comment, user=request.user).first()
 
     if existing_vote:
         if existing_vote.vote_type == vote_type:
-            # Aynı oy tekrar yapıldıysa, oyu geri çek
             existing_vote.delete()
             if vote_type == 'upvote':
                 comment.upvotes -= 1
             elif vote_type == 'downvote':
                 comment.downvotes -= 1
         else:
-            # Oy türünü değiştir
             if vote_type == 'upvote':
                 comment.upvotes += 1
                 comment.downvotes -= 1
@@ -249,7 +244,6 @@ def vote_comment(request, comment_id, vote_type):
             existing_vote.vote_type = vote_type
             existing_vote.save()
     else:
-        # Yeni oy ekle
         if vote_type == 'upvote':
             comment.upvotes += 1
         elif vote_type == 'downvote':

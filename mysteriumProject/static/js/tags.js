@@ -5,14 +5,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const searchResultsContainer = document.getElementById('search-results');
     let tags = new Set();
 
-    // Tag Arama
+    // Tag Search
     searchTagBtn.addEventListener('click', function () {
         const query = tagInput.value.trim();
         if (query) {
             fetch(`/fetch_wikidata/?tags=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
-                    searchResultsContainer.innerHTML = ''; // Önceki sonuçları temizle
+                    searchResultsContainer.innerHTML = '';
                     if (data.results && Object.keys(data.results).length > 0) {
                         for (const tag of Object.values(data.results)[0]) {
                             const li = document.createElement('li');
@@ -31,11 +31,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 .catch(() => {
                     searchResultsContainer.innerHTML = '<li class="list-group-item">Error fetching data. Try again later.</li>';
                 });
-            $('#tagSearchModal').modal('show'); // Modal'ı göster
+            $('#tagSearchModal').modal('show'); // Modal
         }
     });
 
-    // Tag Ekleme
+    // Tag Adding
     function addTag(label, qNumber) {
         const formattedTag = `${label} (${qNumber.startsWith('Q') ? qNumber : 'Q' + qNumber})`;
         if (!tags.has(formattedTag)) {
@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Tagleri Input Alanına Yaz
     function updateInputValue() {
         tagInput.value = Array.from(tags).join(', ');
     }

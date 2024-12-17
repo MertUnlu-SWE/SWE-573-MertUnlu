@@ -146,7 +146,7 @@ class AdvancedSearchForm(forms.Form):
     )
 
 
-# UNIT_CHOICES tanımı
+# UNIT_CHOICES
 UNIT_CHOICES = [
     ('cm', 'Centimeter'),
     ('m', 'Meter'),
