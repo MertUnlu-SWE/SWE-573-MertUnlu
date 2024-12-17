@@ -1,8 +1,6 @@
 # Virtual environment klasörü
 mysterium_env/
 
-# Medya dosyaları (kullanıcıların yüklediği resimler vb.)
-media/
 
 # Django cache dosyaları
 __pycache__/
