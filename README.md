@@ -2,6 +2,9 @@
 ## Deployed Project Link
 https://mysterium.onrender.com
 
+## Project Deliverable Report
+https://github.com/MertUnlu-SWE/SWE-573-MertUnlu/blob/main/Deliverables/Swe573%20Fall%202024%20-%20Final%20Project%20Report%20-%20Mert%20%C3%9Cnl%C3%BC.pdf
+
 ## Project Overview
 
 This repository is part of the SWE 573 course and serves as a comprehensive exploration of **Git** as a version control system, the **Wikidata API**, and Python-Django web development. The primary focus is on mastering essential tools and methodologies to build a robust and functional web platform while documenting the learning process.
